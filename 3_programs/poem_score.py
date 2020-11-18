@@ -5,7 +5,6 @@ from semantic_similarity import tfidf_vector_similarity
 import itertools
 import pronouncing
 import difflib
-#from transformers import BertTokenizer, BertForNextSentencePrediction
 import torch
 import nltk
 from nltk.corpus import gutenberg
@@ -21,25 +20,11 @@ def pairs(seq):
         prev = item
 
 
-#BertTokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-#BertModel = BertForNextSentencePrediction.from_pretrained('bert-base-uncased', return_dict=True)
-
-
 def _semsim(line1, line2):
     try:
         return tfidf_vector_similarity(line1, line2)
     except AttributeError:
         return tfidf_vector_similarity(' '.join(line1), ' '.join(line2))
-
-
-def _bert_next_sentence_prediction(line1, line2):
-    print(line1)
-    print(line2)
-    encoding = BertTokenizer(line1, line2, return_tensors='pt')
-
-    outputs = BertModel(**encoding, labels=torch.LongTensor([1]))
-    logits = outputs.logits
-    print('logits[0, 0]: {0}, logits[0, 1]: {1}, is random: {2}'.format(logits[0, 0], logits[0, 1], logits[0, 0] < logits[0, 1]))
 
 
 def poem_score(poem_lines):
