@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
 import nltk
-from nltk.corpus import cmudict
-nltk.download('cmudict')
+from nltk.corpus import wordnet
 from collections import OrderedDict, defaultdict
 import pronouncing
 import itertools
-from pysle import isletool
-isleDict = isletool.LexicalTool('../2_data/ISLEdict.txt')
+
+from nltk.corpus import gutenberg
 
 
 def _load_wpsm_matrix(path):
@@ -38,9 +37,16 @@ phoneme_similarity_matrix, normalizer = _load_wpsm_matrix('../2_data/wpsm.txt')
 
 
 def rhyme_score(word1, word2):
+    # penalize identical words
+    if word1 == word2:
+        return 0.0
+
     # phonetic mapping
     all_phones_1 = pronouncing.phones_for_word(word1)
     all_phones_2 = pronouncing.phones_for_word(word2)
+
+    synsets_1 = wordnet.synsets(word1)
+    synsets_2 = wordnet.synsets(word2)
 
     permutations = itertools.product(all_phones_1, all_phones_2)
 
@@ -89,7 +95,7 @@ def rhyme_score(word1, word2):
 
                 tmp = 0.0
 
-                # same phoneme, different stress
+                # same phoneme, possibly different stress
                 if phoneme_1 == phoneme_2:
                     tmp = 2.0
                 else:
@@ -119,12 +125,14 @@ def rhyme_score(word1, word2):
     ret = sorted(ret, key=lambda x: x[0], reverse=True)
 
     # return phones, from which we can try to convert to IPA or somehow guess a synset or POS
-    return ret[0]
+    return ret[0] if ret else (0.0, None, None)
 
 
 if __name__ == '__main__':
     pairs = [
         ('cow', 'bow'),
+        ('project', 'eject'),
+        ('defect', 'detect'),
         ('behavior', 'savior'),
         ('squirrel', 'quarrel'),
         ('alabaster', 'plaster'),
@@ -146,5 +154,14 @@ if __name__ == '__main__':
         ('permit', 'hermit'),
         ('permit', 'remit'),
     ]
+    #words = ['leicht', 'ached', 'elect', 'irked', 'eked', 'eject', 'oct', 'act', 'object', 'abject']
+    #pairs = itertools.combinations(words, 2)
+
+    all_results = []
     for p in pairs:
-        print('rhyme_score of {0}, {1}: {2}'.format(p[0], p[1], rhyme_score(p[0], p[1])))
+        all_results.append((rhyme_score(p[0], p[1]), p[0], p[1]))
+
+    all_results = sorted(all_results, key=lambda x: x[0], reverse=True)
+
+    for a in all_results:
+        print('rhyme_score of {0}, {1}: {2}'.format(a[1], a[2], a[0][0]))
