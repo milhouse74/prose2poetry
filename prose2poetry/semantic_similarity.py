@@ -8,8 +8,8 @@ import numpy
 from sklearn.feature_extraction.text import TfidfVectorizer
 import re
 
-nltk.download('gutenberg')
-nltk.download('wordnet')
+nltk.download("gutenberg")
+nltk.download("wordnet")
 
 ALPHA = 0.2
 BETA = 0.45
@@ -22,7 +22,7 @@ N = 0
 
 
 def get_best_synset_pair(word_1, word_2):
-    
+
     max_sim = -1.0
     synsets_1 = wordnet.synsets(word_1)
     synsets_2 = wordnet.synsets(word_2)
@@ -33,23 +33,23 @@ def get_best_synset_pair(word_1, word_2):
         best_pair = None, None
         for synset_1 in synsets_1:
             for synset_2 in synsets_2:
-               sim = wordnet.path_similarity(synset_1, synset_2)
-               if sim!=None and sim > max_sim:
-                   max_sim = sim
-                   best_pair = synset_1, synset_2
+                sim = wordnet.path_similarity(synset_1, synset_2)
+                if sim != None and sim > max_sim:
+                    max_sim = sim
+                    best_pair = synset_1, synset_2
         return best_pair
 
 
 def length_dist(synset_1, synset_2):
-    
+
     l_dist = sys.maxsize
-    if synset_1 is None or synset_2 is None: 
+    if synset_1 is None or synset_2 is None:
         return 0.0
     if synset_1 == synset_2:
         # if synset_1 and synset_2 are the same synset return 0
         l_dist = 0.0
     else:
-        wset_1 = set([str(x.name()) for x in synset_1.lemmas()])        
+        wset_1 = set([str(x.name()) for x in synset_1.lemmas()])
         wset_2 = set([str(x.name()) for x in synset_2.lemmas()])
         if len(wset_1.intersection(wset_2)) > 0:
             # if synset_1 != synset_2 but there is word overlap, return 1.0
@@ -64,19 +64,18 @@ def length_dist(synset_1, synset_2):
 
 
 def hierarchy_dist(synset_1, synset_2):
-    
+
     h_dist = sys.maxsize
-    if synset_1 is None or synset_2 is None: 
+    if synset_1 is None or synset_2 is None:
         return h_dist
     if synset_1 == synset_2:
         # return the depth of one of synset_1 or synset_2
         h_dist = max([x[1] for x in synset_1.hypernym_distances()])
     else:
         # find the max depth of least common subsumer
-        hypernyms_1 = {x[0]:x[1] for x in synset_1.hypernym_distances()}
-        hypernyms_2 = {x[0]:x[1] for x in synset_2.hypernym_distances()}
-        lcs_candidates = set(hypernyms_1.keys()).intersection(
-            set(hypernyms_2.keys()))
+        hypernyms_1 = {x[0]: x[1] for x in synset_1.hypernym_distances()}
+        hypernyms_2 = {x[0]: x[1] for x in synset_2.hypernym_distances()}
+        lcs_candidates = set(hypernyms_1.keys()).intersection(set(hypernyms_2.keys()))
         if len(lcs_candidates) > 0:
             lcs_dists = []
             for lcs_candidate in lcs_candidates:
@@ -90,28 +89,31 @@ def hierarchy_dist(synset_1, synset_2):
             h_dist = max(lcs_dists)
         else:
             h_dist = 0
-    return ((math.exp(BETA * h_dist) - math.exp(-BETA * h_dist)) / 
-        (math.exp(BETA * h_dist) + math.exp(-BETA * h_dist)))
-    
+    return (math.exp(BETA * h_dist) - math.exp(-BETA * h_dist)) / (
+        math.exp(BETA * h_dist) + math.exp(-BETA * h_dist)
+    )
+
 
 def word_similarity(word_1, word_2):
     synset_pair = get_best_synset_pair(word_1, word_2)
-    return (length_dist(synset_pair[0], synset_pair[1]) * 
-        hierarchy_dist(synset_pair[0], synset_pair[1]))
+    return length_dist(synset_pair[0], synset_pair[1]) * hierarchy_dist(
+        synset_pair[0], synset_pair[1]
+    )
 
 
 def most_similar_word(word, word_set):
     max_sim = -1.0
     sim_word = ""
     for ref_word in word_set:
-      sim = word_similarity(word, ref_word)
-      if sim > max_sim:
-          max_sim = sim
-          sim_word = ref_word
+        sim = word_similarity(word, ref_word)
+        if sim > max_sim:
+            max_sim = sim
+            sim_word = ref_word
     return sim_word, max_sim
-    
+
+
 def info_content(lookup_word):
-    
+
     global N
     if N == 0:
         # poor man's lazy evaluation
@@ -125,7 +127,7 @@ def info_content(lookup_word):
     lookup_word = lookup_word.lower()
     n = 0 if lookup_word not in gutenberg_freqs else gutenberg_freqs[lookup_word]
     return 1.0 - (math.log(n + 1) / math.log(N + 1))
-    
+
 
 def semantic_vector(words, joint_words, info_content_norm):
     sent_set = set(words)
@@ -142,20 +144,25 @@ def semantic_vector(words, joint_words, info_content_norm):
             sim_word, max_sim = most_similar_word(joint_word, sent_set)
             semvec[i] = PHI if max_sim > PHI else 0.0
             if info_content_norm:
-                semvec[i] = semvec[i] * info_content(joint_word) * info_content(sim_word)
+                semvec[i] = (
+                    semvec[i] * info_content(joint_word) * info_content(sim_word)
+                )
         i = i + 1
-    return semvec                
-            
+    return semvec
+
+
 def semantic_similarity(row):
-    sentence_1 = re.sub('[^A-Za-z0-9\s]', '', row['question1']).lower()
-    sentence_2 = re.sub('[^A-Za-z0-9\s]', '', row['question2']).lower()
+    sentence_1 = re.sub("[^A-Za-z0-9\s]", "", row["question1"]).lower()
+    sentence_2 = re.sub("[^A-Za-z0-9\s]", "", row["question2"]).lower()
     info_content_norm = True
     words_1 = nltk.word_tokenize(sentence_1)
     words_2 = nltk.word_tokenize(sentence_2)
     joint_words = set(words_1).union(set(words_2))
     vec_1 = semantic_vector(words_1, joint_words, info_content_norm)
     vec_2 = semantic_vector(words_2, joint_words, info_content_norm)
-    return numpy.dot(vec_1, vec_2.T) / (numpy.linalg.norm(vec_1) * numpy.linalg.norm(vec_2))
+    return numpy.dot(vec_1, vec_2.T) / (
+        numpy.linalg.norm(vec_1) * numpy.linalg.norm(vec_2)
+    )
 
 
 def word_order_vector(words, joint_words, windex):
@@ -189,7 +196,9 @@ def word_order_similarity(sentence_1, sentence_2):
 
 
 def similarity(sentence_1, sentence_2, info_content_norm):
-    return DELTA * semantic_similarity(sentence_1, sentence_2, info_content_norm) + (1.0 - DELTA) * word_order_similarity(sentence_1, sentence_2)
+    return DELTA * semantic_similarity(sentence_1, sentence_2, info_content_norm) + (
+        1.0 - DELTA
+    ) * word_order_similarity(sentence_1, sentence_2)
 
 
 def tfidf_vector_similarity(sentence_1, sentence_2):
@@ -197,7 +206,9 @@ def tfidf_vector_similarity(sentence_1, sentence_2):
     vectorizer = TfidfVectorizer(min_df=1)
     vec_1 = vectorizer.fit_transform(corpus).toarray()[0]
     vec_2 = vectorizer.fit_transform(corpus).toarray()[1]
-    sim = numpy.dot(vec_1, vec_2.T) / (numpy.linalg.norm(vec_1) * numpy.linalg.norm(vec_2))
+    sim = numpy.dot(vec_1, vec_2.T) / (
+        numpy.linalg.norm(vec_1) * numpy.linalg.norm(vec_2)
+    )
     return sim
 
 
@@ -206,4 +217,4 @@ def jaccard_similarity_coefficient(sentence_1, sentence_2):
     words_2 = nltk.word_tokenize(sentence_2)
     joint_words = set(words_1).union(set(words_2))
     intersection_words = set(words_1).intersection(set(words_2))
-    return len(intersection_words)/len(joint_words)
+    return len(intersection_words) / len(joint_words)
