@@ -12,19 +12,30 @@ class PoemScorer:
     # rhyme score weight
     rhyme_weight = 1.5
     stress_weight = 0.5
-    semantic_weight = 0.0 #0.25
+    semantic_weight = 0.0  # 0.25
     meteor_weight = 0.25
 
     def __init__(self, prose_corpus):
         # use METEOR, it's the best-recommended by the paper
-        self.nlgeval = NLGEval(no_glove=True, no_skipthoughts=True, metrics_to_omit={'CIDEr', 'ROUGE_L', 'Bleu_1', 'Bleu_2', 'Bleu_3', 'Bleu_4'})
+        self.nlgeval = NLGEval(
+            no_glove=True,
+            no_skipthoughts=True,
+            metrics_to_omit={
+                "CIDEr",
+                "ROUGE_L",
+                "Bleu_1",
+                "Bleu_2",
+                "Bleu_3",
+                "Bleu_4",
+            },
+        )
 
         self.semantic_scorer = SemanticSimilarity(prose_corpus)
         self.prose_corpus = prose_corpus
 
     def score_poem(self, poem_lines):
         if len(poem_lines) != 2:
-            raise ValueError('can only score 2-line poems/couplets')
+            raise ValueError("can only score 2-line poems/couplets")
 
         num_words = 0
         last_words = set()
@@ -70,18 +81,25 @@ class PoemScorer:
         tmp = self.semantic_scorer.similarity(poem_lines[0], poem_lines[1])
         semantic_score += tmp
 
-        nlg_scores_1 = self.nlgeval.compute_individual_metrics(self.prose_corpus.joined_sents, poem_lines[0])
-        nlg_scores_2 = self.nlgeval.compute_individual_metrics(self.prose_corpus.joined_sents, poem_lines[1])
+        nlg_scores_1 = self.nlgeval.compute_individual_metrics(
+            self.prose_corpus.joined_sents, poem_lines[0]
+        )
+        nlg_scores_2 = self.nlgeval.compute_individual_metrics(
+            self.prose_corpus.joined_sents, poem_lines[1]
+        )
 
         meteor_score = 0.0
         try:
-            meteor_score = nlg_scores_1['METEOR'] + nlg_scores_2['METEOR']
+            meteor_score = nlg_scores_1["METEOR"] + nlg_scores_2["METEOR"]
         except Exception as e:
-            print('failed to get meteor score: {0}'.format(str(e)))
+            print("failed to get meteor score: {0}".format(str(e)))
 
         # normalize by poem length in words
         ret = (
-            PoemScorer.rhyme_weight * last_word_rhyme_score + PoemScorer.stress_weight * stress_string_score + PoemScorer.semantic_weight * semantic_score + PoemScorer.meteor_weight * meteor_score
+            PoemScorer.rhyme_weight * last_word_rhyme_score
+            + PoemScorer.stress_weight * stress_string_score
+            + PoemScorer.semantic_weight * semantic_score
+            + PoemScorer.meteor_weight * meteor_score
         ) / num_words
 
         return ret

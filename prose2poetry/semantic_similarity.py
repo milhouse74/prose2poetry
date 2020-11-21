@@ -102,6 +102,7 @@ def _most_similar_word(word, word_set):
             sim_word = ref_word
     return sim_word, max_sim
 
+
 def _word_order_vector(words, joint_words, windex):
     wovec = numpy.zeros(len(joint_words))
     i = 0
@@ -121,6 +122,7 @@ def _word_order_vector(words, joint_words, windex):
         i = i + 1
     return wovec
 
+
 def _word_order_similarity(sentence_1, sentence_2):
     words_1 = nltk.word_tokenize(sentence_1)
     words_2 = nltk.word_tokenize(sentence_2)
@@ -129,6 +131,7 @@ def _word_order_similarity(sentence_1, sentence_2):
     r1 = _word_order_vector(words_1, joint_words, windex)
     r2 = _word_order_vector(words_2, joint_words, windex)
     return 1.0 - (numpy.linalg.norm(r1 - r2) / numpy.linalg.norm(r1 + r2))
+
 
 class SemanticSimilarity:
     def __init__(self, prose_corpus, info_content_norm=False):
@@ -146,7 +149,11 @@ class SemanticSimilarity:
 
     def _info_content(self, lookup_word):
         lookup_word = lookup_word.lower()
-        n = 0 if lookup_word not in self.corpus_freqs else self.corpus_freqs[lookup_word]
+        n = (
+            0
+            if lookup_word not in self.corpus_freqs
+            else self.corpus_freqs[lookup_word]
+        )
         return 1.0 - (math.log(n + 1) / math.log(N + 1))
 
     def _semantic_vector(self, words, joint_words):
@@ -165,11 +172,13 @@ class SemanticSimilarity:
                 semvec[i] = _PHI if max_sim > _PHI else 0.0
                 if self.info_content_norm:
                     semvec[i] = (
-                        semvec[i] * self.info_content(joint_word) * self.info_content(sim_word)
+                        semvec[i]
+                        * self.info_content(joint_word)
+                        * self.info_content(sim_word)
                     )
             i = i + 1
         return semvec
-    
+
     def _semantic_similarity(self, sentence_1, sentence_2):
         words_1 = nltk.word_tokenize(sentence_1)
         words_2 = nltk.word_tokenize(sentence_2)

@@ -15,22 +15,28 @@ def main():
     )
 
     parser.add_argument(
-        "--include-seed-word", action="store_true", help="Use seed word in poem, otherwise use any permutation of words from the same universe (semantically)"
+        "--include-seed-word",
+        action="store_true",
+        help="Use seed word in poem, otherwise use any permutation of words from the same universe (semantically)",
     )
 
     parser.add_argument(
-        "--eval-baseline-1", action="store_true", help="Run the evaluation on the Gutenberg Poetry dataset"
+        "--eval-baseline-1",
+        action="store_true",
+        help="Run the evaluation on the Gutenberg Poetry dataset",
     )
 
     parser.add_argument(
-        "--eval-baseline-2", action="store_true", help="Run the evaluation on the Gutenberg Poetry dataset"
+        "--eval-baseline-2",
+        action="store_true",
+        help="Run the evaluation on the Gutenberg Poetry dataset",
     )
 
     parser.add_argument(
         "--top-n", type=int, default=10, help="Only consider the top n scoring pairs"
     )
 
-    parser.add_argument("seed_words", nargs='+', help="seed word")
+    parser.add_argument("seed_words", nargs="+", help="seed word")
     args = parser.parse_args()
 
     if args.eval_baseline_1:
@@ -70,44 +76,33 @@ def main():
     # sort in reverse order
     all_results = sorted(all_results, key=lambda x: x[0], reverse=True)
 
-    print('top 10 results for seed words {0}'.format(args.seed_words))
-    for a in all_results[:args.top_n]:
-        print("combined (semantic, rhyme) score of {0}, {1}: {2}".format(a[1], a[2], a[0]))
+    print("top 10 results for seed words {0}".format(args.seed_words))
+    for a in all_results[: args.top_n]:
+        print(
+            "combined (semantic, rhyme) score of {0}, {1}: {2}".format(a[1], a[2], a[0])
+        )
 
     poems = [
+        ["no sense makes this", "ignorance chicken Buckingham bliss"],
         [
-            'no sense makes this',
-            'ignorance chicken Buckingham bliss'
+            "would that i could see for one last time",
+            "your lovely face in shadows sublime",
         ],
         [
-            'would that i could see for one last time',
-            'your lovely face in shadows sublime'
+            "if only i could see for one last time",
+            "your lovely face in shadows sublime",
         ],
+        ["interior crocodile alligator", "i drive a Chevrolet movie theater"],
         [
-            'if only i could see for one last time',
-            'your lovely face in shadows sublime'
+            "in the brightest core of the burning flame",
+            "his flesh melted - he was never the same",
         ],
-
-        [
-            'interior crocodile alligator',
-            'i drive a Chevrolet movie theater'
-        ],
-        [
-            'in the brightest core of the burning flame',
-            'his flesh melted - he was never the same'
-        ],
-        [
-            'this doesnt even rhyme',
-            'its a waste of effort'
-        ],
-        [
-            'this does rhyme',
-            'a good use of our time'
-        ]
+        ["this doesnt even rhyme", "its a waste of effort"],
+        ["this does rhyme", "a good use of our time"],
     ]
 
     for p in poems:
-        print('evaluating poem:\n{0}\nscore: {1}'.format(p, poem_scorer.score_poem(p)))
+        print("evaluating poem:\n{0}\nscore: {1}".format(p, poem_scorer.score_poem(p)))
 
     return 0
 

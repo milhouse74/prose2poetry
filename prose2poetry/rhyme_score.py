@@ -48,12 +48,12 @@ def rhyme_score(word1, word2):
     all_phones_2 = pronouncing.phones_for_word(word2)
 
     if not all_phones_1 or not all_phones_2:
-        #print(
+        # print(
         #    "couldnt find phonetic pronunciation for words {0}, {1}".format(
         #        word1, word2
         #    ),
         #    file=sys.stderr,
-        #)
+        # )
         return -5.0
 
     # use top phonetic mapping
@@ -102,7 +102,7 @@ def rhyme_score(word1, word2):
 
         # exact match, good
         if phoneme_1 == phoneme_2:
-            phoneme_score += 2.0*position_weight
+            phoneme_score += 2.0 * position_weight
 
         # look for substitutions
         else:
@@ -135,7 +135,7 @@ def rhyme_score(word1, word2):
                 # half score if stressed differently
                 tmp *= 0.5
 
-            phoneme_score += tmp*position_weight
+            phoneme_score += tmp * position_weight
 
     # syllable counts
     syl1 = pronouncing.syllable_count(phones_1)

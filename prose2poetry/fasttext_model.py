@@ -21,8 +21,10 @@ class FasttextModel:
         try:
             self.ft_model = FastText.load(str(FasttextModel.model_path))
         except Exception as e:
-            print('could not load model, training...')
-            self.ft_model = _train_and_save_model(prose_corpus.sents, str(FasttextModel.model_path))
+            print("could not load model, training...")
+            self.ft_model = _train_and_save_model(
+                prose_corpus.sents, str(FasttextModel.model_path)
+            )
 
     def get_top_n_semantic_similar(self, seed_words, n=50):
         ret = []
@@ -39,4 +41,7 @@ class FasttextModel:
     def combined_score(self, word1, word2, rhyme_weight=None):
         if not rhyme_weight:
             rhyme_weight = FasttextModel.rhyme_weight
-        return self.rhyme_score(word1, word2)*rhyme_weight + self.semantic_score(word1, word2) * (1-rhyme_weight)/2
+        return (
+            self.rhyme_score(word1, word2) * rhyme_weight
+            + self.semantic_score(word1, word2) * (1 - rhyme_weight) / 2
+        )

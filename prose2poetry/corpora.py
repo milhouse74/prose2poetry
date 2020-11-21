@@ -7,7 +7,7 @@ import pathlib
 import string
 import pandas
 
-nltk.download('gutenberg')
+nltk.download("gutenberg")
 _data_path = pathlib.Path(__file__).parent.absolute().joinpath("../data")
 
 
@@ -20,7 +20,7 @@ def pairs(seq):
 
 
 class ProseCorpus:
-    default_gutenberg_prose_subset = ['austen-emma.txt']
+    default_gutenberg_prose_subset = ["austen-emma.txt"]
 
     def __init__(self, custom_gutenberg_fileids=None, custom_corpus=None):
         self.sents = None
@@ -43,7 +43,11 @@ class ProseCorpus:
                 # drop the first and last line which are usually the title and 'THE END' or 'FINIS'
                 corpus_lines = corpus_lines[1:-1]
 
-                chapter_lines = [c for c in corpus_lines if len(c) == 2 and c[0].lower() in ['volume', 'chapter']]
+                chapter_lines = [
+                    c
+                    for c in corpus_lines
+                    if len(c) == 2 and c[0].lower() in ["volume", "chapter"]
+                ]
 
                 # remove all CHAPTER/VOLUME markers
                 for c in corpus_lines:
@@ -53,7 +57,7 @@ class ProseCorpus:
                         ##################################
 
                         self.sents.append(c)
-                        self.joined_sents.append(' '.join(c))
+                        self.joined_sents.append(" ".join(c))
 
 
 class GutenbergCouplets:
@@ -67,12 +71,12 @@ class GutenbergCouplets:
             all_lines.append(json.loads(line.strip()))
 
         for pairs_of_lines in pairs(all_lines):
-            if pairs_of_lines[0]['gid'] != pairs_of_lines[1]['gid']:
+            if pairs_of_lines[0]["gid"] != pairs_of_lines[1]["gid"]:
                 # not from same poem
                 continue
 
-            line1 = pairs_of_lines[0]['s']
-            line2 = pairs_of_lines[1]['s']
+            line1 = pairs_of_lines[0]["s"]
+            line2 = pairs_of_lines[1]["s"]
 
             # strip punctuation from last word
             if line1[-1] in string.punctuation:
@@ -97,7 +101,9 @@ class PFCouplets:
 
         all_lines = []
         for poem in pf_csvs.itertuples():
-            all_lines.extend([pl.replace('\n', '').strip() for pl in poem.Poem.split('\r\r') if pl])
+            all_lines.extend(
+                [pl.replace("\n", "").strip() for pl in poem.Poem.split("\r\r") if pl]
+            )
 
         for pairs_of_lines in pairs(all_lines):
             line1 = pairs_of_lines[0]
@@ -115,5 +121,5 @@ class PFCouplets:
 
             # use pronouncingpy to judge couplets
             if line2.split()[-1] in pronouncing.rhymes(line1.split()[-1]):
-                print('these lines are a couplet!\n\t{0}\n\t{1}'.format(line1, line2))
+                print("these lines are a couplet!\n\t{0}\n\t{1}".format(line1, line2))
                 self.couplets.append((line1, line2))
