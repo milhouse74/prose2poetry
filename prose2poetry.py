@@ -3,7 +3,8 @@
 import sys
 import itertools
 from prose2poetry.fasttext_model import FasttextModel
-from prose2poetry.prose_corpus import ProseCorpus
+from prose2poetry.poem_score import PoemScorer
+from prose2poetry.corpora import ProseCorpus, GutenbergCouplets, PFCouplets
 import argparse
 
 
@@ -18,16 +19,32 @@ def main():
     )
 
     parser.add_argument(
+        "--eval-baseline-1", action="store_true", help="Run the evaluation on the Gutenberg Poetry dataset"
+    )
+
+    parser.add_argument(
+        "--eval-baseline-2", action="store_true", help="Run the evaluation on the Gutenberg Poetry dataset"
+    )
+
+    parser.add_argument(
         "--top-n", type=int, default=10, help="Only consider the top n scoring pairs"
     )
 
     parser.add_argument("seed_words", nargs='+', help="seed word")
     args = parser.parse_args()
 
+    if args.eval_baseline_1:
+        b1 = GutenbergCouplets()
+
+    if args.eval_baseline_2:
+        b2 = PFCouplets()
+
     # use default prose corpus - gutenberg novels from Jane Austen
     corpus = ProseCorpus()
 
+    # use prose corpus as input to various internal classes
     ft_model = FasttextModel(corpus)
+    poem_scorer = PoemScorer(corpus)
 
     semantic_sim_words = ft_model.get_top_n_semantic_similar(args.seed_words)
 
@@ -56,6 +73,41 @@ def main():
     print('top 10 results for seed words {0}'.format(args.seed_words))
     for a in all_results[:args.top_n]:
         print("combined (semantic, rhyme) score of {0}, {1}: {2}".format(a[1], a[2], a[0]))
+
+    poems = [
+        [
+            'no sense makes this',
+            'ignorance chicken Buckingham bliss'
+        ],
+        [
+            'would that i could see for one last time',
+            'your lovely face in shadows sublime'
+        ],
+        [
+            'if only i could see for one last time',
+            'your lovely face in shadows sublime'
+        ],
+
+        [
+            'interior crocodile alligator',
+            'i drive a Chevrolet movie theater'
+        ],
+        [
+            'in the brightest core of the burning flame',
+            'his flesh melted - he was never the same'
+        ],
+        [
+            'this doesnt even rhyme',
+            'its a waste of effort'
+        ],
+        [
+            'this does rhyme',
+            'a good use of our time'
+        ]
+    ]
+
+    for p in poems:
+        print('evaluating poem:\n{0}\nscore: {1}'.format(p, poem_scorer.score_poem(p)))
 
     return 0
 

@@ -1,28 +1,21 @@
 import nltk
-from nltk.corpus import wordnet as wn
-from nltk.corpus import gutenberg
+from nltk.corpus import wordnet
 import math
 import sys
-from nltk.corpus import stopwords
 import numpy
 from sklearn.feature_extraction.text import TfidfVectorizer
 import re
 
-nltk.download("gutenberg")
 nltk.download("wordnet")
 
-ALPHA = 0.2
-BETA = 0.45
-ETA = 0.4
-PHI = 0.2
-DELTA = 0.85
-
-gutenberg_freqs = dict()
-N = 0
+_ALPHA = 0.2
+_BETA = 0.45
+_ETA = 0.4
+_PHI = 0.2
+_DELTA = 0.85
 
 
-def get_best_synset_pair(word_1, word_2):
-
+def _get_best_synset_pair(word_1, word_2):
     max_sim = -1.0
     synsets_1 = wordnet.synsets(word_1)
     synsets_2 = wordnet.synsets(word_2)
@@ -40,8 +33,7 @@ def get_best_synset_pair(word_1, word_2):
         return best_pair
 
 
-def length_dist(synset_1, synset_2):
-
+def _length_dist(synset_1, synset_2):
     l_dist = sys.maxsize
     if synset_1 is None or synset_2 is None:
         return 0.0
@@ -60,11 +52,10 @@ def length_dist(synset_1, synset_2):
             if l_dist is None:
                 l_dist = 0.0
     # normalize path length to the range [0,1]
-    return math.exp(-ALPHA * l_dist)
+    return math.exp(-_ALPHA * l_dist)
 
 
-def hierarchy_dist(synset_1, synset_2):
-
+def _hierarchy_dist(synset_1, synset_2):
     h_dist = sys.maxsize
     if synset_1 is None or synset_2 is None:
         return h_dist
@@ -89,83 +80,29 @@ def hierarchy_dist(synset_1, synset_2):
             h_dist = max(lcs_dists)
         else:
             h_dist = 0
-    return (math.exp(BETA * h_dist) - math.exp(-BETA * h_dist)) / (
-        math.exp(BETA * h_dist) + math.exp(-BETA * h_dist)
+    return (math.exp(_BETA * h_dist) - math.exp(-_BETA * h_dist)) / (
+        math.exp(_BETA * h_dist) + math.exp(-_BETA * h_dist)
     )
 
 
-def word_similarity(word_1, word_2):
-    synset_pair = get_best_synset_pair(word_1, word_2)
-    return length_dist(synset_pair[0], synset_pair[1]) * hierarchy_dist(
+def _word_similarity(word_1, word_2):
+    synset_pair = _get_best_synset_pair(word_1, word_2)
+    return _length_dist(synset_pair[0], synset_pair[1]) * _hierarchy_dist(
         synset_pair[0], synset_pair[1]
     )
 
 
-def most_similar_word(word, word_set):
+def _most_similar_word(word, word_set):
     max_sim = -1.0
     sim_word = ""
     for ref_word in word_set:
-        sim = word_similarity(word, ref_word)
+        sim = _word_similarity(word, ref_word)
         if sim > max_sim:
             max_sim = sim
             sim_word = ref_word
     return sim_word, max_sim
 
-
-def info_content(lookup_word):
-
-    global N
-    if N == 0:
-        # poor man's lazy evaluation
-        for sent in gutenberg.sents():
-            for word in sent:
-                word = word.lower()
-                if word not in gutenberg_freqs:
-                    gutenberg_freqs[word] = 0
-                gutenberg_freqs[word] = gutenberg_freqs[word] + 1
-                N = N + 1
-    lookup_word = lookup_word.lower()
-    n = 0 if lookup_word not in gutenberg_freqs else gutenberg_freqs[lookup_word]
-    return 1.0 - (math.log(n + 1) / math.log(N + 1))
-
-
-def semantic_vector(words, joint_words, info_content_norm):
-    sent_set = set(words)
-    semvec = numpy.zeros(len(joint_words))
-    i = 0
-    for joint_word in joint_words:
-        if joint_word in sent_set:
-            # if word in union exists in the sentence, s(i) = 1 (unnormalized)
-            semvec[i] = 1.0
-            if info_content_norm:
-                semvec[i] = semvec[i] * math.pow(info_content(joint_word), 2)
-        else:
-            # find the most similar word in the joint set and set the sim value
-            sim_word, max_sim = most_similar_word(joint_word, sent_set)
-            semvec[i] = PHI if max_sim > PHI else 0.0
-            if info_content_norm:
-                semvec[i] = (
-                    semvec[i] * info_content(joint_word) * info_content(sim_word)
-                )
-        i = i + 1
-    return semvec
-
-
-def semantic_similarity(row):
-    sentence_1 = re.sub("[^A-Za-z0-9\s]", "", row["question1"]).lower()
-    sentence_2 = re.sub("[^A-Za-z0-9\s]", "", row["question2"]).lower()
-    info_content_norm = True
-    words_1 = nltk.word_tokenize(sentence_1)
-    words_2 = nltk.word_tokenize(sentence_2)
-    joint_words = set(words_1).union(set(words_2))
-    vec_1 = semantic_vector(words_1, joint_words, info_content_norm)
-    vec_2 = semantic_vector(words_2, joint_words, info_content_norm)
-    return numpy.dot(vec_1, vec_2.T) / (
-        numpy.linalg.norm(vec_1) * numpy.linalg.norm(vec_2)
-    )
-
-
-def word_order_vector(words, joint_words, windex):
+def _word_order_vector(words, joint_words, windex):
     wovec = numpy.zeros(len(joint_words))
     i = 0
     wordset = set(words)
@@ -176,31 +113,80 @@ def word_order_vector(words, joint_words, windex):
         else:
             # word not in joint_words, find most similar word and populate
             # word_vector with the thresholded similarity
-            sim_word, max_sim = most_similar_word(joint_word, wordset)
-            if max_sim > ETA:
+            sim_word, max_sim = _most_similar_word(joint_word, wordset)
+            if max_sim > _ETA:
                 wovec[i] = windex[sim_word]
             else:
                 wovec[i] = 0
         i = i + 1
     return wovec
 
-
-def word_order_similarity(sentence_1, sentence_2):
+def _word_order_similarity(sentence_1, sentence_2):
     words_1 = nltk.word_tokenize(sentence_1)
     words_2 = nltk.word_tokenize(sentence_2)
     joint_words = list(set(words_1).union(set(words_2)))
     windex = {x[1]: x[0] for x in enumerate(joint_words)}
-    r1 = word_order_vector(words_1, joint_words, windex)
-    r2 = word_order_vector(words_2, joint_words, windex)
+    r1 = _word_order_vector(words_1, joint_words, windex)
+    r2 = _word_order_vector(words_2, joint_words, windex)
     return 1.0 - (numpy.linalg.norm(r1 - r2) / numpy.linalg.norm(r1 + r2))
 
+class SemanticSimilarity:
+    def __init__(self, prose_corpus, info_content_norm=False):
+        self.corpus_freqs = dict()
+        self.N = 0
+        self.info_content_norm = info_content_norm
 
-def similarity(sentence_1, sentence_2, info_content_norm):
-    return DELTA * semantic_similarity(sentence_1, sentence_2, info_content_norm) + (
-        1.0 - DELTA
-    ) * word_order_similarity(sentence_1, sentence_2)
+        for sent in prose_corpus.sents:
+            for word in sent:
+                word = word.lower()
+                if word not in self.corpus_freqs:
+                    self.corpus_freqs[word] = 0
+                self.corpus_freqs[word] += 1
+                self.N += 1
+
+    def _info_content(self, lookup_word):
+        lookup_word = lookup_word.lower()
+        n = 0 if lookup_word not in self.corpus_freqs else self.corpus_freqs[lookup_word]
+        return 1.0 - (math.log(n + 1) / math.log(N + 1))
+
+    def _semantic_vector(self, words, joint_words):
+        sent_set = set(words)
+        semvec = numpy.zeros(len(joint_words))
+        i = 0
+        for joint_word in joint_words:
+            if joint_word in sent_set:
+                # if word in union exists in the sentence, s(i) = 1 (unnormalized)
+                semvec[i] = 1.0
+                if self.info_content_norm:
+                    semvec[i] = semvec[i] * math.pow(self.info_content(joint_word), 2)
+            else:
+                # find the most similar word in the joint set and set the sim value
+                sim_word, max_sim = _most_similar_word(joint_word, sent_set)
+                semvec[i] = _PHI if max_sim > _PHI else 0.0
+                if self.info_content_norm:
+                    semvec[i] = (
+                        semvec[i] * self.info_content(joint_word) * self.info_content(sim_word)
+                    )
+            i = i + 1
+        return semvec
+    
+    def _semantic_similarity(self, sentence_1, sentence_2):
+        words_1 = nltk.word_tokenize(sentence_1)
+        words_2 = nltk.word_tokenize(sentence_2)
+        joint_words = set(words_1).union(set(words_2))
+        vec_1 = self._semantic_vector(words_1, joint_words)
+        vec_2 = self._semantic_vector(words_2, joint_words)
+        return numpy.dot(vec_1, vec_2.T) / (
+            numpy.linalg.norm(vec_1) * numpy.linalg.norm(vec_2)
+        )
+
+    def similarity(self, sentence_1, sentence_2):
+        return _DELTA * self._semantic_similarity(sentence_1, sentence_2) + (
+            1.0 - _DELTA
+        ) * _word_order_similarity(sentence_1, sentence_2)
 
 
+# extra functions
 def tfidf_vector_similarity(sentence_1, sentence_2):
     corpus = [sentence_1, sentence_2]
     vectorizer = TfidfVectorizer(min_df=1)

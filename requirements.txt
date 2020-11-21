@@ -4,3 +4,4 @@ pronouncing
 numpy
 gensim
 matplotlib
+pandas
