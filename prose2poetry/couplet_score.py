@@ -8,8 +8,7 @@ from nlgeval import NLGEval
 from .semantic_similarity import SemanticSimilarity
 
 
-class PoemScorer:
-    # rhyme score weight
+class CoupletScorer:
     rhyme_weight = 1.5
     stress_weight = 0.5
     semantic_weight = 0.0  # 0.25
@@ -33,7 +32,7 @@ class PoemScorer:
         self.semantic_scorer = SemanticSimilarity(prose_corpus)
         self.prose_corpus = prose_corpus
 
-    def score_poem(self, poem_lines):
+    def __call__(self, poem_lines):
         if len(poem_lines) != 2:
             raise ValueError("can only score 2-line poems/couplets")
 
@@ -82,10 +81,10 @@ class PoemScorer:
         semantic_score += tmp
 
         nlg_scores_1 = self.nlgeval.compute_individual_metrics(
-            self.prose_corpus.joined_sents, poem_lines[0]
+            self.prose_corpus, poem_lines[0]
         )
         nlg_scores_2 = self.nlgeval.compute_individual_metrics(
-            self.prose_corpus.joined_sents, poem_lines[1]
+            self.prose_corpus, poem_lines[1]
         )
 
         meteor_score = 0.0
@@ -96,10 +95,10 @@ class PoemScorer:
 
         # normalize by poem length in words
         ret = (
-            PoemScorer.rhyme_weight * last_word_rhyme_score
-            + PoemScorer.stress_weight * stress_string_score
-            + PoemScorer.semantic_weight * semantic_score
-            + PoemScorer.meteor_weight * meteor_score
+            CoupletScorer.rhyme_weight * last_word_rhyme_score
+            + CoupletScorer.stress_weight * stress_string_score
+            + CoupletScorer.semantic_weight * semantic_score
+            + CoupletScorer.meteor_weight * meteor_score
         ) / num_words
 
         return ret

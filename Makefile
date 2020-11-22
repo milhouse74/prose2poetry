@@ -1,4 +1,4 @@
 black:
-	black prose2poetry.py prose2poetry/*.py
+	black evaluate_metrics.py prose2poetry.py prose2poetry/*.py
 
 .PHONY: black

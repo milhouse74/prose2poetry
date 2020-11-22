@@ -3,8 +3,8 @@
 import sys
 import itertools
 from prose2poetry.fasttext_model import FasttextModel
-from prose2poetry.poem_score import PoemScorer
-from prose2poetry.corpora import ProseCorpus, GutenbergCouplets, PFCouplets
+from prose2poetry.couplet_score import CoupletScorer
+from prose2poetry.corpora import ProseCorpus
 import argparse
 
 
@@ -20,37 +20,15 @@ def main():
         help="Use seed word in poem, otherwise use any permutation of words from the same universe (semantically)",
     )
 
-    parser.add_argument(
-        "--eval-baseline-1",
-        action="store_true",
-        help="Run the evaluation on the Gutenberg Poetry dataset",
-    )
-
-    parser.add_argument(
-        "--eval-baseline-2",
-        action="store_true",
-        help="Run the evaluation on the Gutenberg Poetry dataset",
-    )
-
-    parser.add_argument(
-        "--top-n", type=int, default=10, help="Only consider the top n scoring pairs"
-    )
-
     parser.add_argument("seed_words", nargs="+", help="seed word")
     args = parser.parse_args()
-
-    if args.eval_baseline_1:
-        b1 = GutenbergCouplets()
-
-    if args.eval_baseline_2:
-        b2 = PFCouplets()
 
     # use default prose corpus - gutenberg novels from Jane Austen
     corpus = ProseCorpus()
 
     # use prose corpus as input to various internal classes
     ft_model = FasttextModel(corpus)
-    poem_scorer = PoemScorer(corpus)
+    couplet_scorer = CoupletScorer(corpus)
 
     semantic_sim_words = ft_model.get_top_n_semantic_similar(args.seed_words)
 
@@ -102,7 +80,7 @@ def main():
     ]
 
     for p in poems:
-        print("evaluating poem:\n{0}\nscore: {1}".format(p, poem_scorer.score_poem(p)))
+        print("evaluating poem:\n{0}\nscore: {1}".format(p, couplet_scorer(p)))
 
     return 0
 

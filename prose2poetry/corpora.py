@@ -13,7 +13,10 @@ _data_path = pathlib.Path(__file__).parent.absolute().joinpath("../data")
 
 def pairs(seq):
     i = iter(seq)
-    prev = next(i)
+    try:
+        prev = next(i)
+    except StopIteration:
+        return
     for item in i:
         yield prev, item
         prev = item
@@ -43,18 +46,23 @@ class ProseCorpus:
                 # drop the first and last line which are usually the title and 'THE END' or 'FINIS'
                 corpus_lines = corpus_lines[1:-1]
 
+                # remove all CHAPTER/VOLUME markers
                 chapter_lines = [
                     c
                     for c in corpus_lines
                     if len(c) == 2 and c[0].lower() in ["volume", "chapter"]
                 ]
 
-                # remove all CHAPTER/VOLUME markers
                 for c in corpus_lines:
                     if c not in chapter_lines:
                         ##################################
                         # apply other preprocessing here #
                         ##################################
+
+                        if len(c) == 1 and not any(cc.isalpha() for cc in c[0]):
+                            continue
+
+                        c = c[:-1]
 
                         self.sents.append(c)
                         self.joined_sents.append(" ".join(c))
@@ -101,25 +109,23 @@ class PFCouplets:
 
         all_lines = []
         for poem in pf_csvs.itertuples():
-            all_lines.extend(
-                [pl.replace("\n", "").strip() for pl in poem.Poem.split("\r\r") if pl]
-            )
+            # clean up the poem
+            poem_lines = poem.Poem.split("\r\r\n")
+            poem_lines = [p.strip() for p in poem_lines]
+            poem_lines = [p for p in poem_lines if p and p not in string.punctuation]
 
-        for pairs_of_lines in pairs(all_lines):
-            line1 = pairs_of_lines[0]
-            line2 = pairs_of_lines[1]
+            # look for couplets within a single poem
+            for pairs_of_lines in pairs(poem_lines):
+                line1 = pairs_of_lines[0]
+                line2 = pairs_of_lines[1]
 
-            print(line1)
-            print(line2)
+                # strip punctuation from last word
+                if line1[-1] in string.punctuation:
+                    line1 = line1[:-1]
 
-            # strip punctuation from last word
-            if line1[-1] in string.punctuation:
-                line1 = line1[:-1]
+                if line2[-1] in string.punctuation:
+                    line2 = line2[:-1]
 
-            if line2[-1] in string.punctuation:
-                line2 = line2[:-1]
-
-            # use pronouncingpy to judge couplets
-            if line2.split()[-1] in pronouncing.rhymes(line1.split()[-1]):
-                print("these lines are a couplet!\n\t{0}\n\t{1}".format(line1, line2))
-                self.couplets.append((line1, line2))
+                # use pronouncingpy to judge couplets
+                if line2.split()[-1] in pronouncing.rhymes(line1.split()[-1]):
+                    self.couplets.append((line1, line2))

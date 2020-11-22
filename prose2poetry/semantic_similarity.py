@@ -139,7 +139,7 @@ class SemanticSimilarity:
         self.N = 0
         self.info_content_norm = info_content_norm
 
-        for sent in prose_corpus.sents:
+        for sent in prose_corpus:
             for word in sent:
                 word = word.lower()
                 if word not in self.corpus_freqs:
