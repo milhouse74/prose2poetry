@@ -1,0 +1,172 @@
+%
+% File final_report.tex
+%
+%% Based on the style files for ACL 2020, which were
+%% Based on the style files for ACL 2018, NAACL 2018/19, which were
+%% Based on the style files for ACL-2015, with some improvements
+%%  taken from the NAACL-2016 style
+%% Based on the style files for ACL-2014, which were, in turn,
+%% based on ACL-2013, ACL-2012, ACL-2011, ACL-2010, ACL-IJCNLP-2009,
+%% EACL-2009, IJCNLP-2008...
+%% Based on the style files for EACL 2006 by 
+%%e.agirre@ehu.es or Sergi.Balari@uab.es
+%% and that of ACL 08 by Joakim Nivre and Noah Smith
+
+\documentclass[11pt,a4paper]{article}
+\usepackage[hyperref]{acl2020}
+\usepackage{times}
+\usepackage{latexsym}
+\renewcommand{\UrlFont}{\ttfamily\small}
+
+% This is not strictly necessary, and may be commented out,
+% but it will improve the layout of the manuscript,
+% and will typically save some space.
+\usepackage{microtype}
+\usepackage[T1]{fontenc}
+
+\aclfinalcopy % Uncomment this line for the final submission
+%\def\aclpaperid{***} %  Enter the acl Paper ID here
+
+%\setlength\titlebox{5cm}
+% You can expand the titlebox if you need extra space
+% to show all the authors. Please do not make the titlebox
+% smaller than 5cm (the original size); we will check this
+% in the camera-ready version and ask you to change it back.
+
+\newcommand\BibTeX{B\textsc{ib}\TeX}
+
+\title{Prose2poetry -- generating rhyming couplets with Natural Language Processing}
+
+\author{Sophie Bulman \\
+  Affiliation / Address line 1 \\
+  Affiliation / Address line 2 \\
+  Affiliation / Address line 3 \\
+  \texttt{email@domain} \\\And
+  Second Author \\
+  Affiliation / Address line 1 \\
+  Affiliation / Address line 2 \\
+  Affiliation / Address line 3 \\
+  \texttt{email@domain} \\\And
+  Third Author \\
+  Affiliation / Address line 1 \\
+  Affiliation / Address line 2 \\
+  Affiliation / Address line 3 \\
+  \texttt{email@domain} \\}
+
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+	Natural language generation (NLG) is a rich subfield of natural language processing (NLP). The task of evaluating machine-generated text without humans is complex and multi-faceted (CITATION NEEDED). Poetry in particular is difficult to judge due to its characteristic subjective nature (CITATION NEEDED). A very simple form of poetry is a 2-sentence rhyming couplet (CITATION NEEDED). In this paper, we create a rhyming couplet generator which only uses prose texts (novels) as an input. We generate totally new rhyming couplets that compare favorably to couplets extracted from real published poetry.
+\end{abstract}
+
+\section{Introduction}
+
+Let's first define a very simple rhyming couplet. For simplicity, we'll say that any 2-sentence pair where the last words rhyme are a valid couplet. This is ignoring metaphor and other artistic and subjective aspects of poetry (that are hard to define). Here's a simple example, using \textit{<goat, boat>} as an arbitrary rhyming word pair:
+
+\begin{quote}
+	\textit{The farmer milked the goat,}
+
+	\textit{He also owned a boat}
+\end{quote}
+
+
+The task of generating poetry has been explored by Peterson, 2018 (Generating Rhyming Poetry Using LSTM Recurrent Neural Networks). Another paper by Kesarwani, 2018 (AUTOMATIC POETRY CLASSIFICATION USING NATURAL LANGUAGE PROCESSING) describes NLP-informed quantitative measures of rhyme and poem scores for poetry classification and judgment.
+
+Our approach differs from Peterson 2018 by not using poetry as inputs to the model. We start with a prose corpus, which will be used as the input to various subcomponents of our model.
+
+The first step is to generate semantically related and rhyming pairs of words built from the input corpus using the gensim Fasttext word embedding. We achieve this using a weighted combination of a custom \textit{rhyme score} function and the Fasttext semantic similarity measure.
+
+The next step is to feed high-scoring rhyming pairs of words to a language generator model, by setting each rhyming word as the last word in 2 sentences. The generator model will use the same prose corpus as its only input. It should then generate two sentences that have a rhyming last word, which is in essence a very basic rhyming couplet.
+
+The final step is to create a quantitative measure, or \textit{couplet score}, with which we judge the quality of our model's generated couplets. We build on Kesarwani's 2018 methodology to build a couplet score function that takes into account the syllabic length of the 2 sentences (a simplistic judgment of \textit{meter}), semantic similarity across the two sentences, and overall coherence. We show that using our couplet score, our gold standard baseline of rhyming couplets from the Project Gutenberg poetry corpus score high, our ``silver standard'' of lower-quality couplets from the Poetry Foundation corpus scores lower (but still relatively high), and non-rhyming prose scores very low. Using these 3 baselines, we show that our generated couplets score reliably above non-rhyming prose but below the gold standard.
+
+\section{Generating word pairs}
+\label{sec:wordpair}
+
+\subsection{Word embedding}
+
+genism fasttext, semantic similarity, etc. etc.
+
+\subsection{Rhyme score}
+
+phoneme match. Very similar to Kesarwani 2018 (and github.com/aparrish/pronouncingpy rhyme function) with some custom additions:
+
+\begin{itemize}
+	\item
+		weight last phoneme heaviest, first phoneme lightest with numpy.linspace(1.0, 0.1, len(phonemes))
+	\item
+		use phoneme substitutions in cases without exact match (from benhixon citation)
+	\item
+		0,1,2 phoneme stress weight (same stress = 1.0, different stress = 0.5)
+\end{itemize}
+
+Take the highest scoring rhyme pair from every permutation in case of pronouncing ambiguity, \textbf{but don't forget to mention the problem with semantic ambiguity. example of bow (baw) vs. bow (bow) is good here, or detect/defect}. Maybe citation "first emphasis = noun, second emphasis = verb", e.g. "DE-fect" vs. "de-FECT".
+
+\section{Sentence generation}
+\label{sec:languagegen}
+
+LSTM, Markov, etc.
+
+\textbf{how about a very naive model that tries to find existing sentences that end with rhyming word pairs and just join them}
+
+\subsection{Back-to-front sentence generation}
+
+Since we pick rhyming \textit{last word} pairs, we do our generation back-to-front. Specific challenges?
+
+\section{Corpora}
+\label{sec:corpora}
+
+Description of all of our corpora including:
+
+\begin{itemize}
+	\item
+		Input prose corpus (gutenberg novels)\\
+		select 2 consecutive sentences at random to create "non-rhyming bad couplets"
+	\item
+		Gutenberg poetry corpus (aparrish/gutenberg-poetry)\\
+		select all 2 consecutive sentences from a single poem, use pronouncingpy.rhymes function to filter couplets\\
+		methodology borrowed from Peterson 2018\\
+		print some examples
+	\item
+		Poetry Foundation poetry corpus (kaggle link)\\
+		select all 2 consecutive sentences from a single poem, using pronouncingpy.rhymes function to filter couplets\\
+		methodology borrowed from Peterson 2018, dataset borrowed from Keswarani 2018\\
+		print some examples
+\end{itemize}
+
+\section{Couplet scoring}
+\label{sec:coupletscore}
+
+Here we describe the couplet scoring which is some weighted combination of \citep{Ando2005}:
+
+\begin{itemize}
+	\item
+		Rhyme score of the last 2 words
+	\item
+		Use pronouncingpy stresses function to create a string of syllabic stress (which is some measure of the meter of a poem), and use Python difflib SequenceMatcher for edit distance between these (this should score favorably when sentences are similar in length and meter)
+	\item
+		Semantic similarity score, using citation Yuhai Li et al ``Sentence Similarity Based on Semantic Netsand Corpus Statistics''
+	\item
+		METEOR\\
+		using citation of NLG eval - Shikhar Sharma, Layla El Asri, Hannes Schulz, and Jeremie Zumer. "Relevance of Unsupervised Metrics in Task-Oriented Dialogue for Evaluating Natural Language Generation" arXiv preprint arXiv:1706.09799 (2017) - this shows that METEOR is a decent measure which maps reasonably well to human judgement, \textbf{and importantly also judges sentence quality on their own, regardless of the reference corpus}\\
+		also cite the METEOR paper
+\end{itemize}
+
+Be clear here \textbf{that we use the gold standard Gutenberg couplets as the reference sentences to METEOR}, so that our poems are judged against the gold standard.
+
+\section{Results}
+\label{sec:results}
+
+Show the stats here of rhyme score of 1000 random couplets from each of the 2 good poetry baselines, 1 bad prose baseline, our custom models
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+We did a good job
+
+\bibliography{final_report}
+\bibliographystyle{acl_natbib}
+
+\end{document}
