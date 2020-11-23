@@ -14,7 +14,7 @@ class CoupletScorer:
     semantic_weight = 0.1
     meteor_weight = 0.1
 
-    def __init__(self, prose_corpus):
+    def __init__(self, reference_corpus):
         # use METEOR, it's the best-recommended by the paper
         self.nlgeval = NLGEval(
             no_glove=True,
@@ -29,8 +29,8 @@ class CoupletScorer:
             },
         )
 
-        self.semantic_scorer = SemanticSimilarity(prose_corpus)
-        self.prose_corpus = prose_corpus
+        self.semantic_scorer = SemanticSimilarity(reference_corpus)
+        self.reference_corpus = reference_corpus
 
     def __call__(self, poem_lines):
         if len(poem_lines) != 2:
@@ -80,10 +80,10 @@ class CoupletScorer:
         semantic_score = self.semantic_scorer.similarity(poem_lines[0], poem_lines[1])
 
         nlg_scores_1 = self.nlgeval.compute_individual_metrics(
-            self.prose_corpus, poem_lines[0]
+            self.reference_corpus, poem_lines[0]
         )
         nlg_scores_2 = self.nlgeval.compute_individual_metrics(
-            self.prose_corpus, poem_lines[1]
+            self.reference_corpus, poem_lines[1]
         )
 
         meteor_score = 0.0
@@ -92,12 +92,12 @@ class CoupletScorer:
         except Exception as e:
             print("failed to get meteor score: {0}".format(str(e)))
 
-        # normalize by poem length in words
+        # MAYBE DONT normalize by poem length in words
         ret = (
             CoupletScorer.rhyme_weight * last_word_rhyme_score
             + CoupletScorer.stress_weight * stress_string_score
             + CoupletScorer.semantic_weight * semantic_score
             + CoupletScorer.meteor_weight * meteor_score
-        ) / num_words
+        ) / 4
 
         return ret

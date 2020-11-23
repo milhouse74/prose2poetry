@@ -7,6 +7,7 @@ import pathlib
 import string
 import pandas
 import itertools
+import random
 
 nltk.download("gutenberg")
 _data_path = pathlib.Path(__file__).parent.absolute().joinpath("../data")
@@ -102,8 +103,14 @@ class GutenbergCouplets:
             "Gutenberg Poetry dataset: {0} rhyming couplets".format(len(self.couplets))
         )
 
-    def couplets_flat_list(self):
-        return itertools.chain(*self.couplets)
+    def couplets_flat_list(self, n_random_couplets=None):
+        if n_random_couplets is None:
+            # return all the couplets
+            return list(itertools.chain(*self.couplets))
+        else:
+            return list(
+                itertools.chain(*random.sample(self.couplets, n_random_couplets))
+            )
 
 
 class PFCouplets:

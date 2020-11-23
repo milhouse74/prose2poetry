@@ -138,4 +138,7 @@ def rhyme_score(word1, word2):
         ret[idx] = (phoneme_score / max_len_phone) * min_len_phone
 
     ret = sorted(ret, reverse=True)
-    return ret[0] if ret else 0.0
+
+    # divide by 6.0 as a rough measure of normalization
+    # anecdotally good rhyme pairs are near ~6.0
+    return ret[0] / 6.0 if ret else 0.0
