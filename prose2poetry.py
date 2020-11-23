@@ -4,7 +4,8 @@ import sys
 import itertools
 from prose2poetry.fasttext_model import FasttextModel
 from prose2poetry.couplet_score import CoupletScorer
-from prose2poetry.corpora import ProseCorpus
+from prose2poetry.corpora import ProseCorpus, GutenbergCouplets
+from prose2poetry.generators import NaiveGenerator
 import argparse
 
 
@@ -12,6 +13,13 @@ def main():
     parser = argparse.ArgumentParser(
         prog="prose2poetry",
         description="Generate rhyming couplets from prose corpora",
+    )
+
+    parser.add_argument(
+        "--top-n",
+        type=int,
+        default=10,
+        help="Top n combined rhyme/semantic scores to return",
     )
 
     parser.add_argument(
@@ -28,9 +36,16 @@ def main():
 
     # use prose corpus as input to various internal classes
     ft_model = FasttextModel(corpus)
-    couplet_scorer = CoupletScorer(corpus)
 
-    semantic_sim_words = ft_model.get_top_n_semantic_similar(args.seed_words)
+    couplet_gold_standard = GutenbergCouplets()
+
+    # evaluate couplets against the gold standard of gutenberg couplets
+    couplet_scorer = CoupletScorer(couplet_gold_standard.couplets_flat_list())
+
+    # get at least 5x top_n semantically similar words to increase the chances of finding good rhyming pairs among them
+    semantic_sim_words = ft_model.get_top_n_semantic_similar(
+        args.seed_words, n=5 * args.top_n
+    )
 
     # deduplicate
     semantic_sim_words = list(set(semantic_sim_words))
@@ -54,33 +69,17 @@ def main():
     # sort in reverse order
     all_results = sorted(all_results, key=lambda x: x[0], reverse=True)
 
-    print("top 10 results for seed words {0}".format(args.seed_words))
+    print("top {0} results for seed words {1}".format(args.top_n, args.seed_words))
     for a in all_results[: args.top_n]:
         print(
             "combined (semantic, rhyme) score of {0}, {1}: {2}".format(a[1], a[2], a[0])
         )
 
-    poems = [
-        ["no sense makes this", "ignorance chicken Buckingham bliss"],
-        [
-            "would that i could see for one last time",
-            "your lovely face in shadows sublime",
-        ],
-        [
-            "if only i could see for one last time",
-            "your lovely face in shadows sublime",
-        ],
-        ["interior crocodile alligator", "i drive a Chevrolet movie theater"],
-        [
-            "in the brightest core of the burning flame",
-            "his flesh melted - he was never the same",
-        ],
-        ["this doesnt even rhyme", "its a waste of effort"],
-        ["this does rhyme", "a good use of our time"],
-    ]
+    generator = NaiveGenerator(corpus)
+    naive_couplets = generator.generate_couplets()
 
-    for p in poems:
-        print("evaluating poem:\n{0}\nscore: {1}".format(p, couplet_scorer(p)))
+    for nc in naive_couplets:
+        print("evaluating couplet:\n{0}\nscore: {1}".format(nc, couplet_scorer(nc)))
 
     return 0
 

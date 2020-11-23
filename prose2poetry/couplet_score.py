@@ -9,10 +9,10 @@ from .semantic_similarity import SemanticSimilarity
 
 
 class CoupletScorer:
-    rhyme_weight = 1.5
-    stress_weight = 0.5
-    semantic_weight = 0.0  # 0.25
-    meteor_weight = 0.25
+    rhyme_weight = 0.7
+    stress_weight = 0.1
+    semantic_weight = 0.1
+    meteor_weight = 0.1
 
     def __init__(self, prose_corpus):
         # use METEOR, it's the best-recommended by the paper
@@ -69,16 +69,15 @@ class CoupletScorer:
         for l in last_word_combinations:
             last_word_rhyme_score += rhyme_score(l[0], l[1])
 
-        stress_string_combinations = itertools.combinations(stress_strings, 2)
+        stress_string_combinations = list(itertools.combinations(stress_strings, 2))
 
         stress_string_score = 0.0
         for s in stress_string_combinations:
             stress_string_score += difflib.SequenceMatcher(None, s[0], s[1]).ratio()
 
-        semantic_score = 0.0
+        stress_string_score /= len(stress_string_combinations)
 
-        tmp = self.semantic_scorer.similarity(poem_lines[0], poem_lines[1])
-        semantic_score += tmp
+        semantic_score = self.semantic_scorer.similarity(poem_lines[0], poem_lines[1])
 
         nlg_scores_1 = self.nlgeval.compute_individual_metrics(
             self.prose_corpus, poem_lines[0]
@@ -89,7 +88,7 @@ class CoupletScorer:
 
         meteor_score = 0.0
         try:
-            meteor_score = nlg_scores_1["METEOR"] + nlg_scores_2["METEOR"]
+            meteor_score = (nlg_scores_1["METEOR"] + nlg_scores_2["METEOR"]) / 2.0
         except Exception as e:
             print("failed to get meteor score: {0}".format(str(e)))
 

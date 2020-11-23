@@ -6,6 +6,7 @@ import json
 import pathlib
 import string
 import pandas
+import itertools
 
 nltk.download("gutenberg")
 _data_path = pathlib.Path(__file__).parent.absolute().joinpath("../data")
@@ -97,6 +98,13 @@ class GutenbergCouplets:
             if line2.split()[-1] in pronouncing.rhymes(line1.split()[-1]):
                 self.couplets.append((line1, line2))
 
+        print(
+            "Gutenberg Poetry dataset: {0} rhyming couplets".format(len(self.couplets))
+        )
+
+    def couplets_flat_list(self):
+        return itertools.chain(*self.couplets)
+
 
 class PFCouplets:
     data_path = _data_path.joinpath("PoetryFoundationData.csv")
@@ -129,3 +137,7 @@ class PFCouplets:
                 # use pronouncingpy to judge couplets
                 if line2.split()[-1] in pronouncing.rhymes(line1.split()[-1]):
                     self.couplets.append((line1, line2))
+
+        print(
+            "Poetry foundation dataset: {0} rhyming couplets".format(len(self.couplets))
+        )

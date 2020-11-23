@@ -31,23 +31,30 @@ def main():
         description="Evaluate baseline metrics",
     )
 
+    parser.add_argument(
+        "--n-eval",
+        type=int,
+        default=1000,
+        help="Number of couplets to sample for evaluation from all corpora/generators",
+    )
+    args = parser.parse_args()
+
     couplet_baseline_1 = GutenbergCouplets()
     couplet_baseline_2 = PFCouplets()
 
     # use default prose corpus for poem scoring - gutenberg novels from Jane Austen
     prose_corpus = ProseCorpus()
 
-    # select 1000 random samples from our various baselines
-    couplets_1 = random.sample(couplet_baseline_1.couplets, 1000)
-    references_1 = itertools.chain(*couplet_baseline_1.couplets)
+    # select args.n_eval random samples from our various baselines
+    couplets_1 = random.sample(couplet_baseline_1.couplets, args.n_eval)
 
     # use the gold standard (gutenberg poetry) to evaluate all poems
-    couplet_scorer = CoupletScorer(references_1)
+    couplet_scorer = CoupletScorer(couplet_baseline_1.couplets_flat_list())
 
-    couplets_2 = random.sample(couplet_baseline_2.couplets, 1000)
+    couplets_2 = random.sample(couplet_baseline_2.couplets, args.n_eval)
 
     # use random pairs of sentences from our prose corpus for "bad couplets"
-    couplets_3 = random.sample(list(pairs(prose_corpus.joined_sents)), 1000)
+    couplets_3 = random.sample(list(pairs(prose_corpus.joined_sents)), args.n_eval)
 
     couplet_b1_scores = numpy.ndarray(shape=(len(couplets_1),), dtype=numpy.float64)
     couplet_b2_scores = numpy.ndarray(shape=(len(couplets_2),), dtype=numpy.float64)
@@ -81,7 +88,7 @@ def main():
         )
     )
     for i, couplet in enumerate(couplets_3):
-        print("evaluating couplet {0} {1}".format(i, couplet))
+        print("evaluating couplet {0}".format(i))
         prose_b1_scores[i] = couplet_scorer(couplet)
 
     compute_and_print_stats("prose baseline 1", prose_b1_scores)
