@@ -63,7 +63,7 @@ def main():
         )
     )
     for i, couplet in enumerate(couplets_1):
-        print("evaluating couplet {0}".format(i))
+        # print("evaluating couplet {0}".format(i))
         couplet_b1_scores[i] = couplet_scorer(couplet)
 
     compute_and_print_stats("couplet baseline 1 (gutenberg poems)", couplet_b1_scores)
@@ -74,7 +74,7 @@ def main():
         )
     )
     for i, couplet in enumerate(couplets_2):
-        print("evaluating couplet {0}".format(i))
+        # print("evaluating couplet {0}".format(i))
         couplet_b2_scores[i] = couplet_scorer(couplet)
 
     compute_and_print_stats("couplet baseline 2 (poetry foundation)", couplet_b2_scores)
@@ -90,7 +90,7 @@ def main():
         )
     )
     for i, couplet in enumerate(couplets_3):
-        print("evaluating couplet {0}".format(i))
+        # print("evaluating couplet {0}".format(i))
         prose_b1_scores[i] = couplet_scorer(couplet)
 
     compute_and_print_stats("prose baseline 1", prose_b1_scores)
@@ -105,7 +105,7 @@ def main():
         )
     )
     for i, couplet in enumerate(couplets_4):
-        print("evaluating couplet {0}".format(i))
+        # print("evaluating couplet {0}".format(i))
         naive_scores[i] = couplet_scorer(couplet)
 
     compute_and_print_stats("naive generator", naive_scores)

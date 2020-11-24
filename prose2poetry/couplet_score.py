@@ -92,7 +92,6 @@ class CoupletScorer:
         except Exception as e:
             print("failed to get meteor score: {0}".format(str(e)))
 
-        # MAYBE DONT normalize by poem length in words
         ret = (
             CoupletScorer.rhyme_weight * last_word_rhyme_score
             + CoupletScorer.stress_weight * stress_string_score
