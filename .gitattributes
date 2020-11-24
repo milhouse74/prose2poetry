@@ -1,0 +1,2 @@
+data/PoetryFoundationData.csv filter=lfs diff=lfs merge=lfs -text
+data/gutenberg-poetry.ndjson.gz filter=lfs diff=lfs merge=lfs -text

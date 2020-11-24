@@ -1,0 +1,7 @@
+nltk
+sklearn
+pronouncing
+numpy
+gensim
+matplotlib
+pandas
