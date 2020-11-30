@@ -25,6 +25,7 @@ def pairs(seq):
 
 
 class ProseCorpus:
+    ### set default prose dataset
     default_gutenberg_prose_subset = ["austen-emma.txt"]
 
     def __init__(self, custom_gutenberg_fileids=None, custom_corpus=None):
@@ -122,7 +123,6 @@ class PFCouplets:
         pf_csvs = pandas.read_csv(str(PFCouplets.data_path))
         pf_csvs.head()
 
-        all_lines = []
         for poem in pf_csvs.itertuples():
             # clean up the poem
             poem_lines = poem.Poem.split("\r\r\n")

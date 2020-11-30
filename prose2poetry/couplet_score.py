@@ -4,38 +4,27 @@ import pronouncing
 import difflib
 import torch
 import nltk
-from nlgeval import NLGEval
+from nltk.translate.meteor_score import meteor_score
 from .doc2vec_model import Doc2vecModel
 
 
 class CoupletScorer:
+    ### combined score weights
     rhyme_weight = 0.7
     stress_weight = 0.1
     semantic_weight = 0.1
     meteor_weight = 0.1
 
     def __init__(self, reference_corpus):
-        # use METEOR, it's the best-recommended by the paper
-        self.nlgeval = NLGEval(
-            no_glove=True,
-            no_skipthoughts=True,
-            metrics_to_omit={
-                "CIDEr",
-                "ROUGE_L",
-                "Bleu_1",
-                "Bleu_2",
-                "Bleu_3",
-                "Bleu_4",
-            },
-        )
-
         self.semantic_scorer = Doc2vecModel(reference_corpus)
         self.reference_corpus = reference_corpus
 
     def calculate_scores(self, poem_lines):
+        ### keep only two-lines poem
         if len(poem_lines) != 2:
             raise ValueError("can only score 2-line poems/couplets")
 
+        ### calculate informations needed for scoring
         num_words = 0
         last_words = set()
         stress_strings = []
@@ -71,28 +60,21 @@ class CoupletScorer:
             last_word_rhyme_score += rhyme_score(l[0], l[1])
 
         ### stress score
-        stress_string_combinations = list(itertools.combinations(stress_strings, 2))
-
-        stress_string_score = 0.0
-        for s in stress_string_combinations:
-            stress_string_score += difflib.SequenceMatcher(None, s[0], s[1]).ratio()
-
-        stress_string_score /= len(stress_string_combinations)
+        stress_string_score = difflib.SequenceMatcher(None, stress_strings[0], stress_strings[1]).ratio()
 
         ### semantic score
         semantic_score = self.semantic_scorer.similarity(poem_lines[0], poem_lines[1])
 
         ### METEOR score
-        nlg_scores_1 = self.nlgeval.compute_individual_metrics(
+        meteor_score_1 = meteor_score(
             self.reference_corpus, poem_lines[0]
         )
-        nlg_scores_2 = self.nlgeval.compute_individual_metrics(
+        meteor_score_2 = meteor_score(
             self.reference_corpus, poem_lines[1]
         )
 
-        meteor_score = 0.0
         try:
-            meteor_score = (nlg_scores_1["METEOR"] + nlg_scores_2["METEOR"]) / 2.0
+            meteor_score_combined = (meteor_score_1 + meteor_score_2) / 2.0
         except Exception as e:
             print("failed to get meteor score: {0}".format(str(e)))
 
@@ -101,7 +83,6 @@ class CoupletScorer:
             CoupletScorer.rhyme_weight * last_word_rhyme_score
             + CoupletScorer.stress_weight * stress_string_score
             + CoupletScorer.semantic_weight * semantic_score
-            + CoupletScorer.meteor_weight * meteor_score
+            + CoupletScorer.meteor_weight * meteor_score_combined
         )
-
-        return [ret, last_word_rhyme_score, stress_string_score, semantic_score, meteor_score]
+        return [ret, last_word_rhyme_score, stress_string_score, semantic_score, meteor_score_combined]

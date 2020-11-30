@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 import sys
-import itertools
-from prose2poetry.fasttext_model import FasttextModel
 from prose2poetry.corpora import ProseCorpus, GutenbergCouplets, PFCouplets, pairs
 from prose2poetry.couplet_score import CoupletScorer
 from prose2poetry.generators import NaiveGenerator
@@ -39,7 +37,17 @@ def main():
         help="Number of couplets to sample for evaluation from all corpora/generators",
     )
 
-    args = parser.parse_args()
+    parser.add_argument(
+        "--rand-seed",
+        type=int,
+        default=42,
+        help="Integer seed for rng",
+    )
+
+    args = parse_args()
+
+    # set up random seed to replicate
+    random.seed(args.rand_seed)
 
     couplet_baseline_1 = GutenbergCouplets()
     couplet_baseline_2 = PFCouplets()
@@ -53,8 +61,8 @@ def main():
         couplet_baseline_1.couplets_flat_list(n_random_couplets=5000)
     )
 
-    couplet_b1_scores = numpy.ndarray(shape=(len(couplets_1),), dtype=numpy.float64)
-    couplet_b2_scores = numpy.ndarray(shape=(len(couplets_2),), dtype=numpy.float64)
+    couplet_b1_scores = numpy.ndarray(shape=(len(couplets_1), 5), dtype=numpy.float64)
+    couplet_b2_scores = numpy.ndarray(shape=(len(couplets_2), 5), dtype=numpy.float64)
 
     print(
         "\nStep 1: calculating scores for Gutenberg poetry couplets ({0} data points)\n".format(
@@ -81,7 +89,7 @@ def main():
     ## use random pairs of sentences from our prose corpus for "bad couplets"
     prose_corpus = ProseCorpus()
     couplets_3 = random.sample(list(pairs(prose_corpus.joined_sents)), args.n_eval)
-    prose_b1_scores = numpy.ndarray(shape=(len(couplets_3),), dtype=numpy.float64)
+    prose_b1_scores = numpy.ndarray(shape=(len(couplets_3), 5), dtype=numpy.float64)
 
     print(
         "\nStep 3: calculating scores for pairs of lines in prose corpus ({0} data points)\n".format(
@@ -96,7 +104,7 @@ def main():
 
     gen = NaiveGenerator(prose_corpus)
     couplets_4 = gen.generate_couplets(n=args.n_eval)
-    naive_scores = numpy.ndarray(shape=(len(couplets_4),), dtype=numpy.float64)
+    naive_scores = numpy.ndarray(shape=(len(couplets_4), 5), dtype=numpy.float64)
 
     print(
         "\nStep 4: calculating scores for naive couplets from corpus ({0} data points)\n".format(

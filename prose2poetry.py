@@ -7,6 +7,7 @@ from prose2poetry.couplet_score import CoupletScorer
 from prose2poetry.corpora import ProseCorpus, GutenbergCouplets
 from prose2poetry.generators import NaiveGenerator
 import argparse
+import random
 
 
 def main():
@@ -29,7 +30,18 @@ def main():
     )
 
     parser.add_argument("seed_words", nargs="+", help="seed word")
-    args = parser.parse_args()
+
+    parser.add_argument(
+        "--rand-seed",
+        type=int,
+        default=42,
+        help="Integer seed for rng",
+    )
+
+    args = parse_args()
+
+    # set up random seed to replicate
+    random.seed(args.rand_seed)
 
     # use default prose corpus - gutenberg novels from Jane Austen
     corpus = ProseCorpus()
