@@ -5,7 +5,7 @@ import difflib
 import torch
 import nltk
 from nlgeval import NLGEval
-from .semantic_similarity import SemanticSimilarity
+from .doc2vec_model import Doc2vecModel
 
 
 class CoupletScorer:
@@ -29,10 +29,10 @@ class CoupletScorer:
             },
         )
 
-        self.semantic_scorer = SemanticSimilarity(reference_corpus)
+        self.semantic_scorer = Doc2vecModel(reference_corpus)
         self.reference_corpus = reference_corpus
 
-    def __call__(self, poem_lines):
+    def calculate_scores(self, poem_lines):
         if len(poem_lines) != 2:
             raise ValueError("can only score 2-line poems/couplets")
 
@@ -63,12 +63,14 @@ class CoupletScorer:
 
             stress_strings.append(stress_string)
 
+        ### rhyme score
         last_word_combinations = itertools.combinations(last_words, 2)
 
         last_word_rhyme_score = 0.0
         for l in last_word_combinations:
             last_word_rhyme_score += rhyme_score(l[0], l[1])
 
+        ### stress score
         stress_string_combinations = list(itertools.combinations(stress_strings, 2))
 
         stress_string_score = 0.0
@@ -77,8 +79,10 @@ class CoupletScorer:
 
         stress_string_score /= len(stress_string_combinations)
 
+        ### semantic score
         semantic_score = self.semantic_scorer.similarity(poem_lines[0], poem_lines[1])
 
+        ### METEOR score
         nlg_scores_1 = self.nlgeval.compute_individual_metrics(
             self.reference_corpus, poem_lines[0]
         )
@@ -92,11 +96,12 @@ class CoupletScorer:
         except Exception as e:
             print("failed to get meteor score: {0}".format(str(e)))
 
+        ### combined score
         ret = (
             CoupletScorer.rhyme_weight * last_word_rhyme_score
             + CoupletScorer.stress_weight * stress_string_score
             + CoupletScorer.semantic_weight * semantic_score
             + CoupletScorer.meteor_weight * meteor_score
-        ) / 4
+        )
 
-        return ret
+        return [ret, last_word_rhyme_score, stress_string_score, semantic_score, meteor_score]

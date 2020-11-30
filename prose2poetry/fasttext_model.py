@@ -1,11 +1,15 @@
 from gensim.models import FastText
+from nltk.corpus import stopwords
 from .rhyme_score import rhyme_score
 import pathlib
+
+def _postFilter_processing(list_words, len_word_filter=3):
+    return [word for word in list_words if word not in stopwords.words('english') and len(word) > len_word_filter and word.isalpha()]
 
 
 def _train_and_save_model(sents, model_path):
     ft_model = FastText(
-        sents, size=100, window=40, min_count=5, sample=1e-2, sg=1, iter=100
+        sents, size=128, window=32, min_count=5, sample=1e-2, sg=1, iter=50
     )
     ft_model.save(model_path)
     return ft_model
@@ -27,13 +31,15 @@ class FasttextModel:
             )
 
     def get_top_n_semantic_similar(self, seed_words, n=50):
-        ret = []
+        ret_filtered = []
         for seed_word in seed_words:
-            ret.extend([w[0] for w in self.ft_model.wv.most_similar(seed_word, topn=n)])
-        return ret
+            similar_word_tmp = [w[0] for w in self.ft_model.wv.most_similar(seed_word, topn=2*n)]
+            ret_filtered.extend(_postFilter_processing(similar_word_tmp)[:n])
+
+        return ret_filtered
 
     def semantic_score(self, word1, word2):
-        return self.ft_model.wv.similarity(w1=word1, w2=word2)
+        return (self.ft_model.wv.similarity(w1=word1, w2=word2) + 1) / 2 # normalizing the score between 0-1
 
     def rhyme_score(self, word1, word2):
         return rhyme_score(word1, word2)
@@ -43,5 +49,5 @@ class FasttextModel:
             rhyme_weight = FasttextModel.rhyme_weight
         return (
             self.rhyme_score(word1, word2) * rhyme_weight
-            + self.semantic_score(word1, word2) * (1 - rhyme_weight) / 2
+            + self.semantic_score(word1, word2) * (1 - rhyme_weight)
         )

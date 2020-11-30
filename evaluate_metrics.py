@@ -15,13 +15,13 @@ def compute_and_print_stats(corpus_name, scores):
     print(
         "{0} stats:\n\tmean: {1}\n\tmedian: {2}\n\tstddev: {3}\n\tvar: {4}\n\tptp: {5}\n\t75th quantile: {6}\n\t95th quantile: {7}".format(
             corpus_name,
-            numpy.mean(scores),
-            numpy.median(scores),
-            numpy.std(scores),
-            numpy.var(scores),
-            numpy.ptp(scores),
-            numpy.quantile(scores, 0.75),
-            numpy.quantile(scores, 0.95),
+            numpy.mean(scores, axis=0),
+            numpy.median(scores, axis=0),
+            numpy.std(scores, axis=0),
+            numpy.var(scores, axis=0),
+            numpy.ptp(scores, axis=0),
+            numpy.quantile(scores, 0.75, axis=0),
+            numpy.quantile(scores, 0.95, axis=0),
         )
     )
 
@@ -46,13 +46,12 @@ def main():
 
     # select args.n_eval random samples from our various baselines
     couplets_1 = random.sample(couplet_baseline_1.couplets, args.n_eval)
+    couplets_2 = random.sample(couplet_baseline_2.couplets, args.n_eval)
 
     # use a random selection of gold standard gutenberg couplets to evaluate all poems
     couplet_scorer = CoupletScorer(
         couplet_baseline_1.couplets_flat_list(n_random_couplets=5000)
     )
-
-    couplets_2 = random.sample(couplet_baseline_2.couplets, args.n_eval)
 
     couplet_b1_scores = numpy.ndarray(shape=(len(couplets_1),), dtype=numpy.float64)
     couplet_b2_scores = numpy.ndarray(shape=(len(couplets_2),), dtype=numpy.float64)
@@ -64,7 +63,7 @@ def main():
     )
     for i, couplet in enumerate(couplets_1):
         # print("evaluating couplet {0}".format(i))
-        couplet_b1_scores[i] = couplet_scorer(couplet)
+        couplet_b1_scores[i] = couplet_scorer.calculate_scores(couplet)
 
     compute_and_print_stats("couplet baseline 1 (gutenberg poems)", couplet_b1_scores)
 
@@ -75,7 +74,7 @@ def main():
     )
     for i, couplet in enumerate(couplets_2):
         # print("evaluating couplet {0}".format(i))
-        couplet_b2_scores[i] = couplet_scorer(couplet)
+        couplet_b2_scores[i] = couplet_scorer.calculate_scores(couplet)
 
     compute_and_print_stats("couplet baseline 2 (poetry foundation)", couplet_b2_scores)
 
@@ -91,7 +90,7 @@ def main():
     )
     for i, couplet in enumerate(couplets_3):
         # print("evaluating couplet {0}".format(i))
-        prose_b1_scores[i] = couplet_scorer(couplet)
+        prose_b1_scores[i] = couplet_scorer.calculate_scores(couplet)
 
     compute_and_print_stats("prose baseline 1", prose_b1_scores)
 
@@ -106,7 +105,7 @@ def main():
     )
     for i, couplet in enumerate(couplets_4):
         # print("evaluating couplet {0}".format(i))
-        naive_scores[i] = couplet_scorer(couplet)
+        naive_scores[i] = couplet_scorer.calculate_scores(couplet)
 
     compute_and_print_stats("naive generator", naive_scores)
 
