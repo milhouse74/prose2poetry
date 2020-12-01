@@ -10,6 +10,7 @@ import random
 
 
 def compute_and_print_stats(corpus_name, scores):
+    print('combined', 'rhyme', 'stress', 'doc2vec', 'meteor') # you can erase this line Sevag, this is just for testing.
     print(
         "{0} stats:\n\tmean: {1}\n\tmedian: {2}\n\tstddev: {3}\n\tvar: {4}\n\tptp: {5}\n\t75th quantile: {6}\n\t95th quantile: {7}".format(
             corpus_name,
@@ -44,7 +45,7 @@ def main():
         help="Integer seed for rng",
     )
 
-    args = parse_args()
+    args = parser.parse_args()
 
     # set up random seed to replicate
     random.seed(args.rand_seed)

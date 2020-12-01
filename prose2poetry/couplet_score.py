@@ -2,10 +2,8 @@ from .rhyme_score import rhyme_score
 import itertools
 import pronouncing
 import difflib
-import torch
-import nltk
 from nltk.translate.meteor_score import meteor_score
-from .doc2vec_model import Doc2vecModel
+from .vector_models import Doc2vecModel
 
 
 class CoupletScorer:
@@ -26,7 +24,7 @@ class CoupletScorer:
 
         ### calculate informations needed for scoring
         num_words = 0
-        last_words = set()
+        last_words = []
         stress_strings = []
         all_poem_words = []
 
@@ -37,7 +35,7 @@ class CoupletScorer:
                 pwords = pl
 
             num_words += len(pwords)
-            last_words.add(pwords[-1])
+            last_words.append(pwords[-1])
 
             all_poem_words.extend(pwords)
 
@@ -53,11 +51,7 @@ class CoupletScorer:
             stress_strings.append(stress_string)
 
         ### rhyme score
-        last_word_combinations = itertools.combinations(last_words, 2)
-
-        last_word_rhyme_score = 0.0
-        for l in last_word_combinations:
-            last_word_rhyme_score += rhyme_score(l[0], l[1])
+        last_word_rhyme_score = rhyme_score(last_words[0], last_words[1])
 
         ### stress score
         stress_string_score = difflib.SequenceMatcher(None, stress_strings[0], stress_strings[1]).ratio()
@@ -66,12 +60,8 @@ class CoupletScorer:
         semantic_score = self.semantic_scorer.similarity(poem_lines[0], poem_lines[1])
 
         ### METEOR score
-        meteor_score_1 = meteor_score(
-            self.reference_corpus, poem_lines[0]
-        )
-        meteor_score_2 = meteor_score(
-            self.reference_corpus, poem_lines[1]
-        )
+        meteor_score_1 = meteor_score(self.reference_corpus, poem_lines[0])
+        meteor_score_2 = meteor_score(self.reference_corpus, poem_lines[1])
 
         try:
             meteor_score_combined = (meteor_score_1 + meteor_score_2) / 2.0

@@ -6,139 +6,86 @@ import sys
 import numpy
 
 
-def _load_wpsm_matrix(path):
-    ordered_phonemes = []
-    by_phoneme = {}
+def rhyme_score(word1, word2, penalize_short_word = True):
+    # initilize weight of the different scores
+    weight_score_phone_matching = 0.15
+    weight_score_consecutive_phone = 0.7
+    weight_score_syllable_count = 0.15
 
-    abs_max_phoneme = 0.0
+    # penalizing variables
+    penalizing_factor = 6
 
-    with open(path) as f:
-        for i, l in enumerate(f):
-            if i == 0:
-                # first line, empty list per possible phoneme
-                for phoneme in l.split():
-                    ordered_phonemes.append(phoneme)
-            else:
-                scores = l.split()
-                this_phoneme = scores[0]
-                by_phoneme[this_phoneme] = defaultdict(list)
-                for j, score in enumerate(scores[1:]):
-                    score = float(score)
-                    by_phoneme[this_phoneme][ordered_phonemes[j]] = score
-                    abs_max_phoneme = max(abs_max_phoneme, abs(score))
-
-    return by_phoneme, abs_max_phoneme
-
-
-data_path = pathlib.Path(__file__).parent.absolute().joinpath("../data")
-phoneme_similarity_matrix, normalizer = _load_wpsm_matrix(
-    data_path.joinpath("wpsm.txt")
-)
-
-
-def rhyme_score(word1, word2):
+    # lowercasing of the words
     word1 = word1.lower()
     word2 = word2.lower()
+
+    # get phonetic mapping of each word
+    all_phones_1 = pronouncing.phones_for_word(word1)
+    all_phones_2 = pronouncing.phones_for_word(word2)
 
     # penalize identical words
     if word1 == word2:
         return 0.0
 
-    all_phones_1 = pronouncing.phones_for_word(word1)
-    all_phones_2 = pronouncing.phones_for_word(word2)
-
+    # no phone in one (or both) of the words
     if not all_phones_1 or not all_phones_2:
-        # print(
-        #    "couldnt find phonetic pronunciation for words {0}, {1}".format(
-        #        word1, word2
-        #    ),
-        #    file=sys.stderr,
-        # )
         return 0.0
 
+    # one word can have multiple pronunciation
     permutations = list(itertools.product(all_phones_1, all_phones_2))
     ret = [0.0] * len(permutations)
 
+    # loop over all possible permutation and will keep the best permutation
     for idx, permutation in enumerate(permutations):
+        ### 1. PHONEME SCORING ###
+        # left to right phoneme
         phones_1 = permutation[0]
         phones_2 = permutation[1]
 
+        # right to left phoneme
         phones_seq1 = phones_1.split()
         reversed_phones_seq1 = phones_seq1[::-1]
-
         phones_seq2 = phones_2.split()
         reversed_phones_seq2 = phones_seq2[::-1]
 
         # get minimun phonetic mapping
         min_len_phone = min(len(phones_seq1), len(phones_seq2))
 
-        # get maximum length of phonemes
-        max_len_phone = max(len(phones_seq1), len(phones_seq2))
+        ### 1.a) PHONEME MATCHING ###
+        M = sum([1 for phone in phones_seq1 if phone in phones_seq2] +
+                [1 for phone in phones_seq2 if phone in phones_seq1])
+        T = len(phones_seq1) + len(phones_seq2)
+        score_phone_matching = 2*M/T
 
-        # weight 1.0 on the last phoneme, 0.1 on the first phoneme, and importance between
-        phoneme_position_weights = numpy.linspace(1.0, 0.1, min_len_phone)
-
-        # calculate score
-        phoneme_score = 0.0
-
-        # incorporate position to weight the last phoneme the strongest and then gradually reduce
+        ### 2. CONS. PHONEME ###
+        consecutive_phone = 0
         for i in range(min_len_phone):
-            phoneme_1 = reversed_phones_seq1[i]
-            phoneme_2 = reversed_phones_seq2[i]
+            if reversed_phones_seq1[i] != reversed_phones_seq2[i]:
+                break
+            consecutive_phone += 1
+        score_consecutive_phone = consecutive_phone / min_len_phone
 
-            position_weight = phoneme_position_weights[i]
-
-            # exact match, good
-            if phoneme_1 == phoneme_2:
-                phoneme_score += 2.0 * position_weight
-
-            # look for substitutions
-            else:
-                # *1.0 for matching stress
-                # *0.5 for mismatching stress
-                phoneme_1_stress = 0.0
-                phoneme_2_stress = 0.0
-
-                if phoneme_1[-1].isdigit():
-                    phoneme_1, phoneme_1_stress = phoneme_1[:-1], float(phoneme_1[-1])
-                if phoneme_2[-1].isdigit():
-                    phoneme_2, phoneme_2_stress = phoneme_2[:-1], float(phoneme_2[-1])
-
-                tmp = 0.0
-
-                # same phoneme, possibly different stress
-                if phoneme_1 == phoneme_2:
-                    tmp = 2.0
-                else:
-                    # look for potential substitutions
-                    tmp = (
-                        phoneme_similarity_matrix.get(phoneme_1, {}).get(phoneme_2, 0.0)
-                        / normalizer
-                    )
-
-                # stress comparison
-                if phoneme_1_stress == phoneme_2_stress:
-                    tmp *= 1.0
-                else:
-                    # half score if stressed differently
-                    tmp *= 0.5
-
-                phoneme_score += tmp * position_weight
-
+        ### 3. SYLLABLE SCORING ###
         # syllable counts
-        syl1 = pronouncing.syllable_count(phones_1)
-        syl2 = pronouncing.syllable_count(phones_2)
+        syl1_count = pronouncing.syllable_count(phones_1)
+        syl2_count = pronouncing.syllable_count(phones_2)
+        if max(syl1_count, syl2_count) != 1:
+            score_syllable_count = (min(syl1_count, syl2_count) - 1) / (max(syl1_count, syl2_count) - 1)
+        else:
+            score_syllable_count = 1
 
-        # add 1 if the syllable count is the same
-        if syl1 == syl2:
-            phoneme_score += 1.0
 
-        # normalize by maximum length (to prefer longer matches)
-        # multiply by minimum length to prefer longer rhymes
-        ret[idx] = (phoneme_score / max_len_phone) * min_len_phone
+        ### COMBINED SCORE ###
+        rhyme_score = weight_score_phone_matching * score_phone_matching + \
+                      weight_score_consecutive_phone * score_consecutive_phone + \
+                      weight_score_syllable_count * score_syllable_count
+
+        # Add factors to penalize shorter rhyming words
+        if penalize_short_word:
+            rhyme_score = rhyme_score * min(1, min_len_phone / penalizing_factor)
+
+        ret[idx] = rhyme_score
 
     ret = sorted(ret, reverse=True)
 
-    # divide by 6.0 as a rough measure of normalization
-    # anecdotally good rhyme pairs are near ~6.0
-    return ret[0] / 6.0 if ret else 0.0
+    return ret[0]

@@ -8,11 +8,10 @@ The code is licensed under the MIT license. Supplemental data (baseline corpora,
 
 ## Install dependencies
 
-Most of the dependencies are in the `requirements.txt` file. Install in a virtualenv (or your tool of choosing). There is also a custom step in `extra_setup.sh` for installing and configuring the [Maluuba/nlg-eval](https://github.com/Maluuba/nlg-eval) library.
+Most of the dependencies are in the `requirements.txt` file. Install in a virtualenv (or your tool of choosing).
 
 ```
 $ pip install -r ./requirements.txt
-$ ./extra_setup.sh # to install nlg-eval
 ```
 
 ## Code structure
@@ -25,8 +24,8 @@ The important code is in the embedded [prose2poetry](./prose2poetry) library:
 * `generators.py` for poetry generators
 * `rhyme_score.py` contains our custom `rhyme_score` function, which incorporates phonemic substitution from [Phonemic Similarity Metrics to Compare Pronunciation Methods](https://homes.cs.washington.edu/~bhixon/papers/phonemic_similarity_metrics_Interspeech_2011.pdf) into the score
 * `fasttext_model.py` for the genism Fasttext word pair generation, incorporating a semantic score and the above rhyme_score in a weighted combination
-* `semantic_score.py` contains an implementation of [Sentence Similarity Based on Semantic Nets and Corpus Statistics](http://ants.iis.sinica.edu.tw/3BkMJ9lTeWXTSrrvNoKNFDxRm3zFwRR/55/Sentence%20Similarity%20Based%20on%20Semantic%20Nets%20and%20corpus%20statistics.pdf) (borrowed from [this implementation](https://github.com/chanddu/Sentence-similarity-based-on-Semantic-nets-and-Corpus-Statistics-))
-* `couplet_score.py` contains the couplet scorer, which incorporates METEOR (from Maluuba/nlg-eval), semantic score (above), rhyme score (on the last words), and the edit distance from the string of stresses (produced by [pronouncingpy](https://github.com/aparrish/pronouncingpy))
+* `doc2vec_model.py` contains an implementation of the gensim doc2vec. This code will be used to calculate sentence similarity.
+* `couplet_score.py` contains the couplet scorer, which incorporates METEOR (from NLTK), semantic score (above), rhyme score (on the last words), and the edit distance from the string of stresses (produced by [pronouncingpy](https://github.com/aparrish/pronouncingpy))
 * `corpora.py` contains some classes to faciliate the loading and filtering of couplets from nltk's Gutenberg corpus, the [Gutenberg Poetry corpus](https://github.com/aparrish/gutenberg-poetry-corpus), and [PoetryFoundation](https://www.kaggle.com/tgdivy/poetry-foundation-poems) corpus (included in [data](./data))
 
 ### Generate pairs of rhyming words
@@ -91,6 +90,6 @@ combined (semantic, rhyme) score of what, but: 0.598802176363053
 
 ### Couplet scoring
 
-The `CoupletScorer` class requires a corpus as an input. In this project we use the filtered Gutenberg couplets (5000 randomly selected) as the input. These are used as the base corpora of the semantic similarity and METEOR NLG evaluation metrics.
+The `CoupletScorer` class requires a corpus as an input. In this project we use the filtered Gutenberg couplets (5000 randomly selected) as the input. These are used as the base corpora of the semantic similarity and METEOR evaluation metrics.
 
-This is a tricky problem since any NLG metrics (which we need by definition since we are generating couplets) require a base corpus against which to compare and generate metrics.
+This is a tricky problem since METEOR (which we need by definition since we are generating couplets) require a base corpus against which to compare and generate metrics.
