@@ -6,7 +6,7 @@ import sys
 import numpy
 
 
-def rhyme_score(word1, word2, penalize_short_word = True):
+def rhyme_score(word1, word2, penalize_short_word=True):
     # initilize weight of the different scores
     weight_score_phone_matching = 0.15
     weight_score_consecutive_phone = 0.7
@@ -52,10 +52,12 @@ def rhyme_score(word1, word2, penalize_short_word = True):
         min_len_phone = min(len(phones_seq1), len(phones_seq2))
 
         ### 1.a) PHONEME MATCHING ###
-        M = sum([1 for phone in phones_seq1 if phone in phones_seq2] +
-                [1 for phone in phones_seq2 if phone in phones_seq1])
+        M = sum(
+            [1 for phone in phones_seq1 if phone in phones_seq2]
+            + [1 for phone in phones_seq2 if phone in phones_seq1]
+        )
         T = len(phones_seq1) + len(phones_seq2)
-        score_phone_matching = 2*M/T
+        score_phone_matching = 2 * M / T
 
         ### 2. CONS. PHONEME ###
         consecutive_phone = 0
@@ -70,15 +72,18 @@ def rhyme_score(word1, word2, penalize_short_word = True):
         syl1_count = pronouncing.syllable_count(phones_1)
         syl2_count = pronouncing.syllable_count(phones_2)
         if max(syl1_count, syl2_count) != 1:
-            score_syllable_count = (min(syl1_count, syl2_count) - 1) / (max(syl1_count, syl2_count) - 1)
+            score_syllable_count = (min(syl1_count, syl2_count) - 1) / (
+                max(syl1_count, syl2_count) - 1
+            )
         else:
             score_syllable_count = 1
 
-
         ### COMBINED SCORE ###
-        rhyme_score = weight_score_phone_matching * score_phone_matching + \
-                      weight_score_consecutive_phone * score_consecutive_phone + \
-                      weight_score_syllable_count * score_syllable_count
+        rhyme_score = (
+            weight_score_phone_matching * score_phone_matching
+            + weight_score_consecutive_phone * score_consecutive_phone
+            + weight_score_syllable_count * score_syllable_count
+        )
 
         # Add factors to penalize shorter rhyming words
         if penalize_short_word:

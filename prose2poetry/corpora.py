@@ -65,10 +65,13 @@ class ProseCorpus:
                         if len(c) == 1 and not any(cc.isalpha() for cc in c[0]):
                             continue
                         # get all word lowered but not the last word
-                        c = [word.lower() for i, word in enumerate(c) if i != len(c)-1]
+                        c = [
+                            word.lower() for i, word in enumerate(c) if i != len(c) - 1
+                        ]
 
-                        self.sents.append(c)
-                        self.joined_sents.append(" ".join(c))
+                        if c:  # it could possibly be empty after preprocessing
+                            self.sents.append(c)
+                            self.joined_sents.append(" ".join(c))
 
 
 class GutenbergCouplets:

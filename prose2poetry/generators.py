@@ -1,7 +1,6 @@
 import itertools
 from collections import defaultdict
 import pronouncing
-import random
 
 
 class NaiveGenerator:
@@ -11,6 +10,9 @@ class NaiveGenerator:
 
         self.last_words = defaultdict(list)
         for sent in prose_corpus.sents:
+            if not sent:
+                continue
+
             # accumulate all sentences that end with the same last word
             self.last_words[sent[-1]].append(sent)
 
@@ -27,8 +29,9 @@ class NaiveGenerator:
         for pair in self.rhymes[:n]:
             ret.append(
                 [
-                    " ".join(random.choice(self.last_words[pair[0]])),
-                    " ".join(random.choice(self.last_words[pair[1]])),
+                    # pick the shortest candidates
+                    " ".join(min(self.last_words[pair[0]], key=len)),
+                    " ".join(min(self.last_words[pair[1]], key=len)),
                 ]
             )
         return ret

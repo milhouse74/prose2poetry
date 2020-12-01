@@ -93,7 +93,11 @@ def main():
     naive_couplets = generator.generate_couplets()
 
     for nc in naive_couplets:
-        print("evaluating couplet:\n{0}\nscore: {1}".format(nc, couplet_scorer.calculate_scores(nc)))
+        print(
+            "evaluating couplet:\n{0}\nscore: {1}".format(
+                nc, couplet_scorer.calculate_scores(nc)
+            )
+        )
 
     return 0
 

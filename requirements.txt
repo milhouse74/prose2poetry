@@ -5,3 +5,4 @@ numpy
 gensim
 matplotlib
 pandas
+tabulate
