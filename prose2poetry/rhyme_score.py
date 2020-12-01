@@ -55,7 +55,7 @@ def rhyme_score(word1, word2, penalize_short_word = True):
         M = sum([1 for phone in phones_seq1 if phone in phones_seq2] +
                 [1 for phone in phones_seq2 if phone in phones_seq1])
         T = len(phones_seq1) + len(phones_seq2)
-        score_phone_matching = 2*M/T
+        score_phone_matching = M/T
 
         ### 2. CONS. PHONEME ###
         consecutive_phone = 0
