@@ -30,6 +30,8 @@ class ProseCorpus:
 
     def __init__(self, custom_gutenberg_fileids=None, custom_corpus=None):
         self.sents = None
+        self.joined_sents = None
+        self.words = None
 
         if custom_corpus:
             self.sents = custom_corpus
@@ -42,8 +44,11 @@ class ProseCorpus:
 
             self.sents = []
             self.joined_sents = []
+            self.words = []
 
             for gutenberg_fileid in gutenberg_fileids:
+                self.words.extend(gutenberg.words(gutenberg_fileid))
+
                 corpus_lines = gutenberg.sents(gutenberg_fileid)
 
                 # drop the first and last line which are usually the title and 'THE END' or 'FINIS'
@@ -65,10 +70,13 @@ class ProseCorpus:
                         if len(c) == 1 and not any(cc.isalpha() for cc in c[0]):
                             continue
                         # get all word lowered but not the last word
-                        c = [word.lower() for i, word in enumerate(c) if i != len(c)-1]
+                        c = [
+                            word.lower() for i, word in enumerate(c) if i != len(c) - 1
+                        ]
 
-                        self.sents.append(c)
-                        self.joined_sents.append(" ".join(c))
+                        if c:  # it could possibly be empty after preprocessing
+                            self.sents.append(c)
+                            self.joined_sents.append(" ".join(c))
 
 
 class GutenbergCouplets:

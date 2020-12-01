@@ -7,22 +7,30 @@ from prose2poetry.generators import NaiveGenerator
 import argparse
 import numpy
 import random
+import multiprocessing
+import itertools
+from tabulate import tabulate
 
 
-def compute_and_print_stats(corpus_name, scores):
-    print('combined', 'rhyme', 'stress', 'doc2vec', 'meteor') # you can erase this line Sevag, this is just for testing.
-    print(
-        "{0} stats:\n\tmean: {1}\n\tmedian: {2}\n\tstddev: {3}\n\tvar: {4}\n\tptp: {5}\n\t75th quantile: {6}\n\t95th quantile: {7}".format(
-            corpus_name,
-            numpy.mean(scores, axis=0),
-            numpy.median(scores, axis=0),
-            numpy.std(scores, axis=0),
-            numpy.var(scores, axis=0),
-            numpy.ptp(scores, axis=0),
-            numpy.quantile(scores, 0.75, axis=0),
-            numpy.quantile(scores, 0.95, axis=0),
-        )
+def compute_stats(scores):
+    return (
+        numpy.mean(scores, axis=0),
+        numpy.median(scores, axis=0),
+        numpy.std(scores, axis=0),
+        numpy.var(scores, axis=0),
+        numpy.ptp(scores, axis=0),
+        numpy.quantile(scores, 0.75, axis=0),
+        numpy.quantile(scores, 0.95, axis=0),
     )
+
+
+def score_couplets(couplets, scorer):
+    scores = numpy.ndarray(shape=(len(couplets), 5), dtype=numpy.float64)
+
+    for i, couplet in enumerate(couplets):
+        scores[i] = scorer.calculate_scores(couplet)
+
+    return scores
 
 
 def main():
@@ -34,8 +42,15 @@ def main():
     parser.add_argument(
         "--n-eval",
         type=int,
-        default=1000,
+        default=999,
         help="Number of couplets to sample for evaluation from all corpora/generators",
+    )
+
+    parser.add_argument(
+        "--n-pool",
+        type=int,
+        default=16,
+        help="Size of multiprocessing pool (adjust for number of threads)",
     )
 
     parser.add_argument(
@@ -46,6 +61,8 @@ def main():
     )
 
     args = parser.parse_args()
+
+    pool = multiprocessing.Pool(args.n_pool)
 
     # set up random seed to replicate
     random.seed(args.rand_seed)
@@ -62,61 +79,96 @@ def main():
         couplet_baseline_1.couplets_flat_list(n_random_couplets=5000)
     )
 
-    couplet_b1_scores = numpy.ndarray(shape=(len(couplets_1), 5), dtype=numpy.float64)
-    couplet_b2_scores = numpy.ndarray(shape=(len(couplets_2), 5), dtype=numpy.float64)
-
-    print(
-        "\nStep 1: calculating scores for Gutenberg poetry couplets ({0} data points)\n".format(
-            len(couplets_1)
-        )
-    )
-    for i, couplet in enumerate(couplets_1):
-        # print("evaluating couplet {0}".format(i))
-        couplet_b1_scores[i] = couplet_scorer.calculate_scores(couplet)
-
-    compute_and_print_stats("couplet baseline 1 (gutenberg poems)", couplet_b1_scores)
-
-    print(
-        "\nStep 2: calculating scores for PoetryFoundation couplets ({0} data points)\n".format(
-            len(couplets_2)
-        )
-    )
-    for i, couplet in enumerate(couplets_2):
-        # print("evaluating couplet {0}".format(i))
-        couplet_b2_scores[i] = couplet_scorer.calculate_scores(couplet)
-
-    compute_and_print_stats("couplet baseline 2 (poetry foundation)", couplet_b2_scores)
-
-    ## use random pairs of sentences from our prose corpus for "bad couplets"
+    # use random pairs of sentences from our prose corpus for "bad couplets"
     prose_corpus = ProseCorpus()
     couplets_3 = random.sample(list(pairs(prose_corpus.joined_sents)), args.n_eval)
-    prose_b1_scores = numpy.ndarray(shape=(len(couplets_3), 5), dtype=numpy.float64)
-
-    print(
-        "\nStep 3: calculating scores for pairs of lines in prose corpus ({0} data points)\n".format(
-            len(couplets_3)
-        )
-    )
-    for i, couplet in enumerate(couplets_3):
-        # print("evaluating couplet {0}".format(i))
-        prose_b1_scores[i] = couplet_scorer.calculate_scores(couplet)
-
-    compute_and_print_stats("prose baseline 1", prose_b1_scores)
 
     gen = NaiveGenerator(prose_corpus)
     couplets_4 = gen.generate_couplets(n=args.n_eval)
-    naive_scores = numpy.ndarray(shape=(len(couplets_4), 5), dtype=numpy.float64)
 
-    print(
-        "\nStep 4: calculating scores for naive couplets from corpus ({0} data points)\n".format(
-            len(couplets_4)
+    third = int(args.n_eval / 3)
+
+    scores = list(
+        pool.starmap(
+            score_couplets,
+            zip(
+                [
+                    couplets_1[:third],
+                    couplets_1[third : 2 * third],
+                    couplets_1[2 * third :],
+                    couplets_2[:third],
+                    couplets_2[third : 2 * third],
+                    couplets_2[2 * third :],
+                    couplets_3[:third],
+                    couplets_3[third : 2 * third],
+                    couplets_3[2 * third :],
+                    couplets_4[:third],
+                    couplets_4[third : 2 * third],
+                    couplets_4[2 * third :],
+                ],
+                itertools.repeat(couplet_scorer),
+            ),
         )
     )
-    for i, couplet in enumerate(couplets_4):
-        # print("evaluating couplet {0}".format(i))
-        naive_scores[i] = couplet_scorer.calculate_scores(couplet)
 
-    compute_and_print_stats("naive generator", naive_scores)
+    for i in range(0, len(scores), 3):
+        scores_ndarray = numpy.concatenate(
+            (scores[i], scores[i + 1], scores[i + 2]), axis=0
+        )
+        stats = compute_stats(scores_ndarray)
+
+        if i == 0:
+            print(
+                "\nGutenberg, {0} couplets\n----------------------------------------------\n".format(
+                    scores_ndarray.shape[0]
+                )
+            )
+        elif i == 3:
+            print(
+                "\nPoetryFoundation, {0} couplets\n----------------------------------------------\n".format(
+                    scores_ndarray.shape[0]
+                )
+            )
+        elif i == 6:
+            print(
+                "\nProse, {0} couplets\n----------------------------------------------\n".format(
+                    scores_ndarray.shape[0]
+                )
+            )
+        elif i == 9:
+            print(
+                "\nNaive generator, {0} couplets\n----------------------------------------------\n".format(
+                    scores_ndarray.shape[0]
+                )
+            )
+
+        headers = [
+            "metric",
+            "mean",
+            "median",
+            "std",
+            "var",
+            "ptp",
+            ".75 quantile",
+            ".95 quantile",
+        ]
+        metrics = ["total", "rhyme", "stress", "semantic", "meteor"]
+        table = []
+        for i, metric_name in enumerate(metrics):
+            table.append(
+                [
+                    metric_name,
+                    stats[0][i],
+                    stats[1][i],
+                    stats[2][i],
+                    stats[3][i],
+                    stats[4][i],
+                    stats[5][i],
+                    stats[6][i],
+                ]
+            )
+
+        print(tabulate(table, headers, tablefmt="github"))
 
     return 0
 
