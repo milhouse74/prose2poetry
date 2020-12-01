@@ -2,11 +2,12 @@
 
 import sys
 import itertools
-from prose2poetry.fasttext_model import FasttextModel
+from prose2poetry.vector_models import FasttextModel
 from prose2poetry.couplet_score import CoupletScorer
 from prose2poetry.corpora import ProseCorpus, GutenbergCouplets
 from prose2poetry.generators import NaiveGenerator
 import argparse
+import random
 
 
 def main():
@@ -29,7 +30,18 @@ def main():
     )
 
     parser.add_argument("seed_words", nargs="+", help="seed word")
+
+    parser.add_argument(
+        "--rand-seed",
+        type=int,
+        default=42,
+        help="Integer seed for rng",
+    )
+
     args = parser.parse_args()
+
+    # set up random seed to replicate
+    random.seed(args.rand_seed)
 
     # use default prose corpus - gutenberg novels from Jane Austen
     corpus = ProseCorpus()
@@ -81,7 +93,7 @@ def main():
     naive_couplets = generator.generate_couplets()
 
     for nc in naive_couplets:
-        print("evaluating couplet:\n{0}\nscore: {1}".format(nc, couplet_scorer(nc)))
+        print("evaluating couplet:\n{0}\nscore: {1}".format(nc, couplet_scorer.calculate_scores(nc)))
 
     return 0
 

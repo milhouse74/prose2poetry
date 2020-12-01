@@ -25,6 +25,7 @@ def pairs(seq):
 
 
 class ProseCorpus:
+    ### set default prose dataset
     default_gutenberg_prose_subset = ["austen-emma.txt"]
 
     def __init__(self, custom_gutenberg_fileids=None, custom_corpus=None):
@@ -63,8 +64,8 @@ class ProseCorpus:
 
                         if len(c) == 1 and not any(cc.isalpha() for cc in c[0]):
                             continue
-
-                        c = c[:-1]
+                        # get all word lowered but not the last word
+                        c = [word.lower() for i, word in enumerate(c) if i != len(c)-1]
 
                         self.sents.append(c)
                         self.joined_sents.append(" ".join(c))
@@ -122,7 +123,6 @@ class PFCouplets:
         pf_csvs = pandas.read_csv(str(PFCouplets.data_path))
         pf_csvs.head()
 
-        all_lines = []
         for poem in pf_csvs.itertuples():
             # clean up the poem
             poem_lines = poem.Poem.split("\r\r\n")
