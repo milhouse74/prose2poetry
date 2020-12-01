@@ -5,3 +5,6 @@ numpy
 gensim
 matplotlib
 pandas
+tabulate
+keras
+tensorflow>=2.2

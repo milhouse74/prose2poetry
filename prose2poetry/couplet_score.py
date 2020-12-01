@@ -54,7 +54,9 @@ class CoupletScorer:
         last_word_rhyme_score = rhyme_score(last_words[0], last_words[1])
 
         ### stress score
-        stress_string_score = difflib.SequenceMatcher(None, stress_strings[0], stress_strings[1]).ratio()
+        stress_string_score = difflib.SequenceMatcher(
+            None, stress_strings[0], stress_strings[1]
+        ).ratio()
 
         ### semantic score
         semantic_score = self.semantic_scorer.similarity(poem_lines[0], poem_lines[1])
@@ -75,4 +77,10 @@ class CoupletScorer:
             + CoupletScorer.semantic_weight * semantic_score
             + CoupletScorer.meteor_weight * meteor_score_combined
         )
-        return [ret, last_word_rhyme_score, stress_string_score, semantic_score, meteor_score_combined]
+        return [
+            ret,
+            last_word_rhyme_score,
+            stress_string_score,
+            semantic_score,
+            meteor_score_combined,
+        ]
