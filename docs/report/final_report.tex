@@ -42,8 +42,8 @@
   Affiliation / Address line 1 \\
   \texttt{email@domain} \\\And
   Sevag Hanssian \\
-  Affiliation / Address line 1 \\
-  \texttt{email@domain} \\\And
+  McGill University \\
+  \texttt{sevag.hanssian@mail.mcgill.ca} \\\And
   François Milot \\
   Université de Montréal \\
   \texttt{francois.milot@gmail.com} \\}
@@ -68,7 +68,7 @@ Natural language generation (NLG) is a rich subfield of natural language process
 
 Poetry is a form of art that condenses emotions, stories and thoughts in a short writing. There is many style of poems ranging from the famous Haiku and Sonnet that have strong writing requirements to the free verse that has less robust poetic structure \citep{poem_type}. Songs, presidential speeches and love letters are great examples of poetic influences as well. 
 
-Another type of poems are couplets which are two-line forming a unit that rhymes \cite{couplet_def} For simplicity, we'll say that any two-line pair where the last words rhyme are a valid couplet. This is ignoring metaphor and other artistic and subjective aspects of poetry (that are hard to define).
+Another type of poems are couplets which are two-line forming a unit that rhymes \cite{couplet_def} For simplicity, we'll consider that any two-line pair where the last words rhyme, a.k.a. \textit{tail rhymes} (CITATION NEEDED!), are a valid couplet. This is ignoring metaphor and other artistic and subjective aspects of poetry (that are hard to define).
 
 A major subfield of poetic writing is rhyming. While it is not the only form of poetry, it is clearly one of the important one. There are multiple rhyming that varies in degree of rhyme strength. A rhyme would be considered perfect if it has exact assonance and number of syllables. However, there are still some rhymes that are great, while not perfect, like masculine and feminine rhymes. In rhyming poems, the rhymes can occur in the sentence but mostly occurs at the end of each poem's line (end rhyme) \citep{poem_rhyme_type}.
 
@@ -86,32 +86,47 @@ Second, a quantitative measure, or \textit{couplet score}, is created with which
 %%%%%%%%%%%%%%
 % RELATED WORK		%
 %%%%%%%%%%%%%%
-\textcolor{red}{
 \section{Related work}
-The task of generating poetry has been explored by Peterson, 2018 (Generating Rhyming Poetry Using LSTM Recurrent Neural Networks). Another paper by Kesarwani, 2018 (AUTOMATIC POETRY CLASSIFICATION USING NATURAL LANGUAGE PROCESSING) describes NLP-informed quantitative measures of rhyme and poem scores for poetry classification and judgment.
-Our approach differs from Peterson 2018 by not using poetry as inputs to the model. We start with a prose corpus, which will be used as the input to various subcomponents of our model.
-We build on Kesarwani's 2018 methodology to build a couplet score function that takes into account the syllabic length of the 2 sentences (a simplistic judgment of \textit{meter}), semantic similarity across the two sentences, and overall coherence.
-}
+The task of generating poetry has been explored by \citet{cole}, where the model generated rhyming couplets using neural networks trained on rhyming couplets as an input. The author introduced a useful technique to filter the Gutenberg poetry dataset (CITATION NEEDED) into a corpus of gold-standard rhyming couplets.
+
+Another paper by \citet{keswarani} describes several techniques for NLP-driven quantitative measures of rhyme and poem scoring for poetry classification, tested on datasets scraped from PoetryFoundation (CITATION NEEDED, kaggle), an open platform (CITATION NEEDED) .
+
+Our approach differs from \citet{cole} by not using rhyming poetry as inputs to the model. We start with a prose corpus, which will be used as the input to various subcomponents of our model.
 
 %%%%%%%%%%%%%%
 % METHOD			%
 %%%%%%%%%%%%%%
 \section{Method}
 \label{sec:method}
-The method selected was to first start with creating end rhymes and then generate, in a backward fashion, the two lines of the poems.
+The model, \textit{prose2poetry}, will take a prose corpus and a seed word as inputs. As its output, it will generate rhyming couplets based on the theme of the seed word, built from the vocabulary and language of the input corpus. As previously mentioned, the simplistic and working definition of ``couplet'' throughout this paper is any two semantically related sentences with end rhymes. This is split into 2 major components:
+\begin{enumerate}
+	\item
+		Generate pairs of rhyming words from the input corpus vocabulary that are semantically related to the seed word.
+	\item
+		Generate two-sentence pairs from the prose corpus in a backwards direction, by setting the end words to be the rhyming word pairs from the previous step.
+\end{enumerate}
+To judge the success of the model, we propose a quantitative couplet scorer, which in addition to rhyme scores and syllable counts, considers semantic relatedness and NLG evaluation scores to penalize non-sensical outputs. The scores of the generated couplets will be compared to scores of gold standard couplet datasets.
+
+\subsection{Input prose corpus}
+
+We used novels from the nltk Gutenberg dataset.
 
 \subsection{Generating word pairs}
 
 \subsubsection{Rhyme score}
 \label{sec:rhymescore}
-The very first task to generate rhyming words is to have a way of identifying good rhyme. Many approaches are possible to evaluate rhymes as showed in the related work section. The methodology that was selected is a weighted average of three main heuristic scores:
+To generate rhyming words, a method for evaluating rhymes is required. In related works, \citet{keswarani} considered rhyme scores based on phoneme matching from the CMUdict. \citet{cole} used the \verb|rhymes()| function from the Python library pronouncingpy, whose underlying data comes from the CMUdict.
+
+We used pronouncingpy as a more modern interface to the CMUdict, but chose to create a custom rhyme score function, which considers a weighted sum of three heuristic scores -- \textit{reverse consecutive phoneme matching} (RCPM), \textit{overall phoneme matching} (OPM), and \textit{syllable count matching} (SCM).
 \begin{itemize}
 	\item \textit{Reverse consecutive phoneme matching} (RCPM):
-	The RCPM measure is counting, from the last phoneme of each words, how many consecutive matches occurs between the two words and then dividing by the highest possibility of matches between words. Let $c^{(i,j)}_{pho}$ be the reverse consecutive phoneme matches between the $i$th and $j$th words and let $n^{(i)}_{pho}$ be the total amount of phoneme in the $i$th word.
-	$$\textrm{RCPM}^{(i,j)} = \frac{c^{(i,j)}_{pho}}{\min(n^{(i)}_{pho}, n^{(j)}_{pho})}$$
+	RCPM counts, in reverse order starting from the last phoneme of both words, how many consecutive phoneme matches occur between the two words, normalized by the maximum possible matches. Let $c^{(i,j)}_{phoneme}$ be the reverse consecutive phoneme matches between the $i$th and $j$th words and let $n^{(i)}_{phoneme}$ be the phoneme count of the $i$th word.
+	$$\textrm{RCPM}^{(i,j)} = \frac{c^{(i,j)}_{phoneme}}{\min(n^{(i)}_{phoneme}, n^{(j)}_{phoneme})}$$
+	The purpose of the reverse match score is to emphasize the importance of the last phoneme (or syllable), which is a prominent feature of tail rhymes, the primary criteria for what makes a couplet.
 	\item \textit{Overall phoneme matching} (OPM):
-	The OPM is to account for potential feminine rhyme in our score. In other words, even if a reverse consecutive rhyme is not occuring, some phoneme may be common between a pair of words. This type of relation needs to be accounted for in the rhyme score. Let $m^{(i,j)}_{pho}$ be the number of phonemes matches between the two words.
-	$$\textrm{OPM}^{(i,j)} = \frac{2 \times m^{(i,j)}_{pho}}{n^{(i)}_{pho} + n^{(j)}_{pho}}$$
+		The OPM is to account for potential feminine rhyme in our score. In other words, even if a reverse consecutive rhyme is not occuring, some phonemes may be common between a pair of words. This type of relation needs to be accounted for in the rhyme score. Let $m^{(i,j)}_{phoneme}$ be the number of phonemes matches between word 1 and 2, and $m^{(j, i)}_{phoneme}$ be the reverse match.
+	$$\textrm{OPM}^{(i,j)} = \frac{2 * m^{(i,j)}_{phoneme}}{n^{(i)}_{phoneme} + n^{(j)}_{phoneme}}$$
+		This can be considered an adapted Ratcliff/Obserhelp string similarity score \cite{ratcliff}, using phonemes instead of characters.
 	\item \textit{Syllable count matching} (SCM):
 	The last one is to account for balanced length of syllable between word pair as well as similar musicality and stress in the word. Let $n^{(i)}_{syl}$ be the total amount of syllables in the $i$th word.
 	\begin{equation}
@@ -185,6 +200,9 @@ The word embedding have been trained on the prose corpus and the hyper parameter
 \end{table}
 \end{enumerate}
 
+\subsubsection{Multiple pronunciations and sense disambiguation}
+
+A considerable problem
 
 \textcolor{blue}{
 fmilot: Sevag, I will let you comment on that!
