@@ -173,7 +173,7 @@ The custom rhyme score function uses the phoneme data from the CMUdict in a weig
 	The subtraction by 1 is to ensure that the lowest possible SCM score can be 0.
 \end{tight_itemize}
 
-The weights assigned to each score was fine-tuned with manual adjustment, leading to the final weight table in \ref{table:weight_rhyme_score}.
+The weights assigned to each score were fine-tuned with manual adjustment, leading to the final weight table in \ref{table:weight_rhyme_score}.
 
 \begin{table}[ht]
 \centering
@@ -257,11 +257,7 @@ Consider two illustrating examples:
 		``defect'' can be pronounced with a beginning emphasis, i.e. ``DEE-fect'', the noun, or with an end emphasis, ``de-FECT'', the verb.
 \end{tight_enumerate}
 
-These are very complex ambiguities, illustrated alongside their WordNet synsets and parts of speech in figure \ref{fig:wordnet}. \citet{keswarani} ignores senses for simplicity and takes the maximum rhyme score of all the permutations of the different pronunciations of word $a$ and word $b$ -- the same approach was followed in this paper.
-
-The closest lexical resource for joint pronunciation and sense disambiguation is Wiktionary \cite{wiktionary}, which is not incorporated in any Python NLP libraries or toolkits as of yet. It was considered beyond the scope of this project to scrape and transform Wiktionary into a lexical resource.
-
-One attempted solution was to penalize words with multiple pronunciations by dividing the rhyme score by the total number of pronunciation permutations. However this led to the rhyme score being unable to find any good rhymes. Another approach was taken by \citet{hixon}, who created a matrix for common phoneme-phoneme substitutions, or \textit{WPSM}. However, this still doesn't attempt to disambiguate sense, but simply assigns scores by the frequency in the corpus.
+These are complex ambiguities, illustrated alongside their WordNet synsets and parts of speech in figure \ref{fig:wordnet}. This can only be resolved with a lexical resource that provides combined sense and pronunciation disambiguation. One attempted solution was to penalize words with multiple pronunciations by dividing the rhyme score by the total number of pronunciation permutations. However this led to the rhyme score being unable to find any good rhymes. \citet{keswarani} ignored senses for simplicity and took the maximum rhyme score of all the permutations of the different pronunciations of word $a$ and word $b$ -- the same approach was followed in this paper.
 
 \subsubsection{Word embedding}
 \label{sec:fasttext}
@@ -352,12 +348,27 @@ To score a couplet, a weighted sum of multiple metrics was used to compute a sin
 \begin{tight_itemize}
 	\vspace{-0.5em}
 	\item \textit{Rhyme score}: This is the measure that was introduced in section \ref{sec:rhymescore}, applied to the two end words of the two sentences of the couplet.
-	\item \textit{Sentence coherence}: This metric is ensure both lines of the couplet are close to each other in context, or semantically. For this, the doc2vec embedding model \cite{docvec} was used. The training of this model was similar to the FastText embedding (see table \ref{table:HP_fasttext}) but with larger window (size 64) and using distributed memory for the training method.
 	\item \textit{Stress}: Using the pronouncingpy library, the syllabic stress of all of the words in each line was concatenated. 0 represents unstressed, 1 represents primary stress, and 2 represents secondary stress as defined by the CMUdict. Then, a string similarity score \cite{ratcliff} was applied. This should score high for sentences that are stressed in the same way, selecting for \textit{meter} in the couplets.
+	\item \textit{Semantic coherence}: This metric is ensure both lines of the couplet are close to each other in context, or semantically. For this, the doc2vec embedding model \cite{docvec} was used. The training of this model was similar to the FastText embedding (see table \ref{table:HP_fasttext}) but with larger window (size 64) and using distributed memory for the training method.
 	\item \textit{NLG evaluation score}: Using the conclusions of \citet{nlgeval}, the NLG score METEOR \cite{meteor} was selected. \citet{nlgeval} found that METEOR mapped reasonably well to human judgement, and importantly also judged sentence quality on their own, regardless of the reference sentences. The downside of METEOR (and any NLG metric) is that it requires the inputs, or the lines of the couplet in this case, to be compared to a list of \textit{reference sentences}. The Gutenberg gold standard baseline was selected to be the reference, to ensure that sentences that resemble real poetry score highly in METEOR.
 
 		It would be unfeasible due to computational cost to use all 331,713 Gutenberg couplets as an input, so a limited subset had to be selected. A random selection of 5,000 couplets was used as the reference. Finally, several evaluation runs were done with different RNG seeds, and the total METEOR score was relatively stable across all runs. This concluded that randomization didn't influence the scores strongly.
 \end{tight_itemize}
+
+The weights assigned to each score were again fine-tuned with manual adjustment, leading to the final weight table in \ref{table:weight_couplet_score}.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{c c c c}
+	\hline\hline
+	Rhyme & Stress & Semantic & NLG \\ [0.5ex]
+	\hline
+	70\% & 10\% & 10\% & 10\% \\ [0.5ex]
+	\hline
+\end{tabular}
+\caption{Weights of couplet score}
+\label{table:weight_couplet_score}
+\end{table}
 
 \textcolor{blue}{
 \subsection{Results}
