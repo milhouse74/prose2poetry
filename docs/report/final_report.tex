@@ -70,7 +70,7 @@
 % ABSTRACT			%
 %%%%%%%%%%%%%%
 \begin{abstract}
-	Natural language generation (NLG) is a rich subfield of natural language processing (NLP). The task of evaluating machine-generated text is complex and multi-faceted \cite{maluuba}. Poetry in particular is difficult to judge due to its characteristic metaphor and subjective nature. A very simple form of poetry is a 2-sentence couplet with end rhymes. In this paper, a model is proposed that can generate simple rhyming couplets, with only non-poetic (i.e. prose) texts as an input. The model's output compare favorably to couplets written by humans according to a proposed quantitative couplet scoring function.
+	Natural language generation (NLG) is a rich subfield of natural language processing (NLP). The task of evaluating machine-generated text is complex and multi-faceted \cite{nlgeval}. Poetry in particular is difficult to judge due to its characteristic metaphor and subjective nature. A very simple form of poetry is a 2-sentence couplet with end rhymes. In this paper, a model is proposed that can generate simple rhyming couplets, with only non-poetic (i.e. prose) texts as an input. The model's output compare favorably to couplets written by humans according to a proposed quantitative couplet scoring function.
 \end{abstract}
 
 %%%%%%%%%%%%%%
@@ -193,7 +193,7 @@ The weights assigned to each score was fine-tuned with manual adjustment, leadin
 >>> rhyme_score('affection', 'perfection')
 0.88
 >>> rhyme_score('affection', 'disgust')
-0.1
+0.075
 \end{Verbatim}
 \caption{Some examples of rhyme score}
 \label{fig:rhymescorecode}
@@ -257,11 +257,11 @@ Consider two illustrating examples:
 		``defect'' can be pronounced with a beginning emphasis, i.e. ``DEE-fect'', the noun, or with an end emphasis, ``de-FECT'', the verb.
 \end{tight_enumerate}
 
-These are very complex ambiguities, illustrated alongside their WordNet synsets and parts of speech in figure \ref{fig:wordnet}. \citet{keswarani} ignores senses and simply takes the maximum rhyme score of all the permutations of the different pronunciations of word $a$ and word $b$ -- the same approach was followed in this paper.
+These are very complex ambiguities, illustrated alongside their WordNet synsets and parts of speech in figure \ref{fig:wordnet}. \citet{keswarani} ignores senses for simplicity and takes the maximum rhyme score of all the permutations of the different pronunciations of word $a$ and word $b$ -- the same approach was followed in this paper.
 
 The closest lexical resource for joint pronunciation and sense disambiguation is Wiktionary \cite{wiktionary}, which is not incorporated in any Python NLP libraries or toolkits as of yet. It was considered beyond the scope of this project to scrape and transform Wiktionary into a lexical resource.
 
-One attempted solution was to penalize words with multiple pronunciations by dividing the rhyme score by the total number of pronunciation permutations. However this led to the rhyme score being unable to find any good rhymes. Another approach was done by \citet{hixon}, who created a matrix for common phoneme-phoneme substitutions, or \textit{WPSM}. However, this still doesn't attempt to disambiguate sense, but simply assigns scores by the frequency in the corpus.
+One attempted solution was to penalize words with multiple pronunciations by dividing the rhyme score by the total number of pronunciation permutations. However this led to the rhyme score being unable to find any good rhymes. Another approach was taken by \citet{hixon}, who created a matrix for common phoneme-phoneme substitutions, or \textit{WPSM}. However, this still doesn't attempt to disambiguate sense, but simply assigns scores by the frequency in the corpus.
 
 \subsubsection{Word embedding}
 \label{sec:fasttext}
@@ -292,7 +292,7 @@ The word embedding is trained on the input prose corpus. This ensures that the v
 \subsubsection{Word pair creation}
 \begin{tight_enumerate}
 	\item \textit{Theme selection}: To be able to generate a pair of words, the system needs to have a \textit{seed word}. This can be considered the ``theme'' of the couplets that will be generated.
-	\item \textit{Gather context-neigbors of theme}: From the seed word, a list of the most similar words in context is generated. More specifically, the FastText model exposes a cosine distance measure to establish the neighbors of that word. From that list, a list of permutations of all possible word pairs that are near to the seed word in context can be created.
+	\item \textit{Gather context-neigbors of theme}: From the seed word, a list of the most similar words in context is generated. More specifically, the FastText model exposes a cosine distance measure to establish the neighbors of that word. From that list, a list of permutations of all possible word pairs that are near the seed word in context can be created.
 	\item \textit{Word-pair scoring}: Given a list of all the possible word pairs, each pair can be scored with their respective semantic distance to the theme and with their rhyme score (see section \ref{sec:rhymescore}). The weights assigned to the semantic and rhyme scores were selected to emphasize rhyming over context. The selected weights are shown in table \ref{table:weight_wordpair}. The top-scoring pairs in the final list are used as inputs to the sentence generation.
 \begin{table}[ht]
 \centering
@@ -324,44 +324,40 @@ Since we pick rhyming \textit{last word} pairs, we do our generation back-to-fro
 \section{Experiments and Results}
 \label{sec:results}
 
-\textcolor{blue}{
-\subsection{Corpora}
+\subsection{Baseline corpora}
 \label{sec:corpora}
-Description of all of our corpora including:
-\begin{itemize}
-	\item
-		Input prose corpus (gutenberg novels)\\
-		select 2 consecutive sentences at random to create "non-rhyming bad couplets"
-	\item
-		Gutenberg poetry corpus (aparrish/gutenberg-poetry)\\
-		select all 2 consecutive sentences from a single poem, use pronouncingpy.rhymes function to filter couplets\\
-		methodology borrowed from Peterson 2018\\
-		print some examples
-	\item
-		Poetry Foundation poetry corpus (kaggle link)\\
-		select all 2 consecutive sentences from a single poem, using pronouncingpy.rhymes function to filter couplets\\
-		methodology borrowed from Peterson 2018, dataset borrowed from Keswarani 2018\\
-		print some examples
-\end{itemize}
-}
+
+Using a similar approach to \citet{cole}, the Gutenberg Poetry \cite{gutenbergpoetry} and PoetryFoundation \cite{poetryfoundationkaggle} datasets were filtered to produce rhyming couplets, as its easier to extract couplets from larger poetry datasets than it is to find datasets exclusively containing couplets.
+
+The filtering process uses the \verb|rhymes()| function of the pronouncingpy library to extract every pair with rhyming end words from the same poem as a couplet. The use of an external rhyme function (and not the rhyme score from section \ref{sec:rhymescore}) is to avoid bias.
+
+The total is 331,713 rhyming couplets from Gutenberg, and 5,909 rhyming couplets from PoetryFoundation. Some examples can be seen in figure \ref{fig:couplet_examples}. These datasets are used as baselines, where Gutenberg is considered the gold standard, since they come from a body of published and famous authors, and PoetryFoundation is considered the silver standard, since they can be submitted by anybody.
+
+\begin{figure}
+	\textit{That lies between thine eyelids and thine eyes,} \newline
+	\textit{Like a flower laid upon a flower it lies} \newline
+	-- Gutenberg
+	\vspace{0.5em}
+	\newline
+	\textit{How we on our own tickle the chin,} \newline
+	\textit{Of the prince or the dame that lets us in} \newline
+	-- PoetryFoundation
+\caption{An example of anonymized couplets from Gutenberg and PoetryFoundation}
+\label{fig:couplet_examples}
+\end{figure}
 
 \subsection{Couplet scoring}
 \label{sec:coupletscore}
-To evaluate the different baselines, we have used multiple metrics to help us determined the quality of our generated poems.
+To score a couplet, a weighted sum of multiple metrics was used to compute a single scalar value $\in [0, 1]$:
+\begin{tight_itemize}
+	\vspace{-0.5em}
+	\item \textit{Rhyme score}: This is the measure that was introduced in section \ref{sec:rhymescore}, applied to the two end words of the two sentences of the couplet.
+	\item \textit{Sentence coherence}: This metric is ensure both lines of the couplet are close to each other in context, or semantically. For this, the doc2vec embedding model \cite{docvec} was used. The training of this model was similar to the FastText embedding (see table \ref{table:HP_fasttext}) but with larger window (size 64) and using distributed memory for the training method.
+	\item \textit{Stress}: Using the pronouncingpy library, the syllabic stress of all of the words in each line was concatenated. 0 represents unstressed, 1 represents primary stress, and 2 represents secondary stress as defined by the CMUdict. Then, a string similarity score \cite{ratcliff} was applied. This should score high for sentences that are stressed in the same way, selecting for \textit{meter} in the couplets.
+	\item \textit{NLG evaluation score}: Using the conclusions of \citet{nlgeval}, the NLG score METEOR \cite{meteor} was selected. \citet{nlgeval} found that METEOR mapped reasonably well to human judgement, and importantly also judged sentence quality on their own, regardless of the reference sentences. The downside of METEOR (and any NLG metric) is that it requires the inputs, or the lines of the couplet in this case, to be compared to a list of \textit{reference sentences}. The Gutenberg gold standard baseline was selected to be the reference, to ensure that sentences that resemble real poetry score highly in METEOR.
 
-\begin{itemize}
-	\item \textit{Rhyme score}: This is the measure that was introduced in Section \ref{sec:rhymescore}.
-	\item \textit{Sentence Coherence}: This metric is to evaluate if the two lines of the couplet are near in context and are coherent with each others. For that purpose, we use doc2vec embedding model \cite{docvec}. The training of this model is similar to the FastText embedding (see Table \ref{table:HP_fasttext}) but with higher window (size 64) and using distributed memory for the training method.
-\textcolor{blue}{
-	\item Stress 
-	\item METEOR\\
-		using citation of NLG eval - Shikhar Sharma, Layla El Asri, Hannes Schulz, and Jeremie Zumer. "Relevance of Unsupervised Metrics in Task-Oriented Dialogue for Evaluating Natural Language Generation" arXiv preprint arXiv:1706.09799 (2017) - this shows that METEOR is a decent measure which maps reasonably well to human judgement, \textbf{and importantly also judges sentence quality on their own, regardless of the reference corpus}\\
-		also cite the METEOR paper
-		Be clear here \textbf{that we use the gold standard Gutenberg couplets as the reference sentences to METEOR}, so that our poems are judged against the gold standard.
-}
-\end{itemize}
-
-
+		It would be unfeasible due to computational cost to use all 331,713 Gutenberg couplets as an input, so a limited subset had to be selected. A random selection of 5,000 couplets was used as the reference. Finally, several evaluation runs were done with different RNG seeds, and the total METEOR score was relatively stable across all runs. This concluded that randomization didn't influence the scores strongly.
+\end{tight_itemize}
 
 \textcolor{blue}{
 \subsection{Results}
