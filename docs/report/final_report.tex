@@ -70,7 +70,7 @@
 % ABSTRACT			%
 %%%%%%%%%%%%%%
 \begin{abstract}
-	Natural language generation (NLG) is a rich subfield of natural language processing (NLP). The task of evaluating machine-generated text is complex and multi-faceted \cite{nlgeval}. Poetry in particular is difficult to judge due to its characteristic metaphor and subjective nature. A very simple form of poetry is a 2-sentence couplet with end rhymes. In this paper, a model is proposed that can generate simple rhyming couplets, with only non-poetic (i.e. prose) texts as an input. The model's output compare favorably to couplets written by humans according to a proposed quantitative couplet scoring function.
+	Natural language generation (NLG) is a rich subfield of natural language processing (NLP). The task of evaluating machine-generated text without human judges is complex and multi-faceted \cite{nlgeval}. Poetry in particular is difficult to judge due to its characteristic metaphor and subjective nature. A very simple form of poetry is a 2-sentence couplet with end rhymes. In this paper, a model is proposed that can generate simple rhyming couplets, with only non-poetic (i.e. prose) texts as an input. The model's outputs compare favorably to couplets written by humans, according to a proposed quantitative couplet scoring function.
 \end{abstract}
 
 %%%%%%%%%%%%%%
@@ -79,7 +79,7 @@
 \section{Introduction}
 \label{sec:intro}
 
-Poetry is a form of writing that condenses emotions, stories, and thoughts in rhyming verses. Devices such as rhyme and meter are used to impart musicality to the written lines, transforming them into an artistic performance beyond simple information transfer. Underneath the surface, or \textit{form} of the poem, \textit{metaphor} is often used to weave subtexts and hidden meanings. There are many style of poems ranging from the \textit{haiku} and \textit{sonnet}, which have strict rules, to \textit{free verse} which has a more flexible structure \citep{poem_type}.
+Poetry is a form of writing that condenses emotions, stories, and thoughts into rhyming verses. Devices such as rhyme and meter are used to impart musicality to the written lines, transforming them into an artistic performance beyond simple information transfer. Underneath the surface, or \textit{form} of the poem, \textit{metaphor} is often used to weave subtexts and hidden meanings. There are many style of poems ranging from the \textit{haiku} and \textit{sonnet}, which have strict rules, to \textit{free verse} which has a more flexible structure \citep{poem_type}.
 
 Rhyme is not the only component of poetry, but it is one of the most important. In rhyming poems, rhymes can occur in the middle of the lines, known as \textit{internal} or \textit{middle rhyme} \cite{internal_rhyme_def}, but the most typical is the \textit{end rhyme} \cite{end_rhyme_def} on the last words of the lines. There are also multiple types of rhyme. There is \textit{perfect rhyme}, where the two words have the exact same assonance and number of syllables, \textit{masculine rhyme}, where the rhyme is on the stressed last syllable, and \textit{feminine rhyme}, where the rhyme is on the unstressed last syllable \citep{poem_rhyme_type}.
 
