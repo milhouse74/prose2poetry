@@ -57,7 +57,6 @@ def rhyme_score(word1, word2, penalize_short_word=True):
             + [1 for phone in phones_seq2 if phone in phones_seq1]
         )
         T = len(phones_seq1) + len(phones_seq2)
-         fmilot_report
         score_phone_matching = M/T
 
         ### 2. CONS. PHONEME ###
