@@ -19,6 +19,8 @@
 \usepackage{latexsym}
 \usepackage{amsmath}
 \usepackage{fancyvrb}
+\usepackage{subcaption}
+\usepackage{placeins}
 \renewcommand{\UrlFont}{\ttfamily\small}
 
 % This is not strictly necessary, and may be commented out,
@@ -124,7 +126,7 @@ A simplifying decision in this paper, mentioned in section \ref{sec:intro}, was 
 
 \subsection{Input corpus}
 
-The input corpora tested were free and public domain English novels from the nltk Gutenberg dataset \cite[Chapter~2]{gutenbergnltk}. These are available in a preprocessed form in nltk. Some additional preprocessing in the \textit{prose2poetry} model is to drop tokens that only consisted of punctuation, strip punctuation from words, and omit various author, title page, chapter, and volume headings.
+The input corpora tested were free and public domain English novels from the \textit{Natural Language Toolkit} (NLTK) Gutenberg dataset \cite[Chapter~2]{gutenbergnltk}. These are available in a preprocessed form in NLTK. Some additional preprocessing in the \textit{prose2poetry} model is to drop tokens that only consisted of punctuation, strip punctuation from words, and omit various author, title page, chapter, and volume headings.
 
 \subsection{Generating word pairs}
 
@@ -146,7 +148,7 @@ From the related works section in \ref{sec:related}, \citet{keswarani}, \citet{c
 \label{fig:cmudict}
 \end{figure}
 
-Some simple Python code in figure \ref{fig:cmudict} shows the phoneme pronunciation information for the word ``bow'' exposed by the CMUdict, both from the CMUdict corpus in nltk and from the pronouncingpy interface.
+Some simple Python code in figure \ref{fig:cmudict} shows the phoneme pronunciation information for the word ``bow'' exposed by the CMUdict, both from the CMUdict corpus in NLTK and from the pronouncingpy interface.
 
 \subsubsection{Rhyme score}
 \label{sec:rhymescore}
@@ -154,15 +156,15 @@ The custom rhyme score function uses the phoneme data from the CMUdict in a weig
 \begin{tight_itemize}
 	\vspace{-0.5em}
 	\item \textit{Reverse consecutive phoneme matching} (RCPM):
-	RCPM counts, in reverse order starting from the last phoneme of both words, how many consecutive phoneme matches occur between the two words, normalized by the maximum possible matches. Let $c^{(a,b)}_{\text{phoneme}}$ be the reverse consecutive phoneme matches between words $a$ and $b$ and let $n^{(a)}_{\text{phoneme}}$ be the phoneme count of word $a$.
+	RCPM counts, in reverse order starting from the last phoneme of both words, how many consecutive phoneme matches occur between the two words, normalized by the maximum possible matches. Let $c^{(a,b)}_{\text{phoneme}}$ be the reverse consecutive phoneme matches between words $a$ and $b$ and let $n^{(i)}_{\text{phoneme}}, i = {a, b}$ be the phoneme count for the words $a$ and $b$, then:
 	$$\textrm{RCPM}^{(a,b)} = \frac{c^{(a,b)}_{\text{phoneme}}}{\min(n^{(a)}_{\text{phoneme}}, n^{(b)}_{\text{phoneme}})}$$
 	The purpose of the reverse match score is to emphasize the importance of the last phoneme for end rhymes.
 	\item \textit{Overall phoneme matching} (OPM):
-		OPM counts all common phonemes between a pair of words without considering order. For words that don't have any consecutive identical reverse phonemes, they may still exhibit a smaller degree of rhyme. Let $m^{(a,b)}_{\text{phoneme}}$ be the total number of phoneme matches between word $a$ and $b$, and $n^{(a)}_{\text{phoneme}}$ be the phoneme count of word $a$.
+		OPM counts all common phonemes between a pair of words without considering order. For words that don't have any consecutive identical reverse phonemes, they may still exhibit a smaller degree of rhyme. Let $m^{(a,b)}_{\text{phoneme}}$ be the total number of phoneme matches between word $a$ and $b$, and $n^{(i)}_{\text{phoneme}}, i = {a, b}$ be the phoneme counts for words $a$ and $b$, then:
 		$$\textrm{OPM}^{(a,b)} = \frac{2 * m^{(a,b)}_{\text{phoneme}}}{n^{(a)}_{\text{phoneme}} + n^{(b)}_{\text{phoneme}}}$$
 		This can be considered an adapted Ratcliff/Obserhelp string similarity score \cite{ratcliff}, using phonemes instead of characters.
 	\item \textit{Syllable count matching} (SCM):
-	The last score is to prefer words that have the same or similar number of syllables. Let $n^{(a)}_{\text{syllable}}$ be the total amount of syllables in word $a$.
+	The last score selects for words close in number of syllables. Let $n^{(i)}_{\text{syllable}}, i = {a, b}$ be the total counts of syllables in words $a$ and $b$.
 	\begin{equation}
 	\textrm{SCM}^{(a,b)} = 
 	\begin{cases}
@@ -173,11 +175,11 @@ The custom rhyme score function uses the phoneme data from the CMUdict in a weig
 	The subtraction by 1 is to ensure that the lowest possible SCM score can be 0.
 \end{tight_itemize}
 
-The weights assigned to each score were fine-tuned with manual adjustment, leading to the final weight table in \ref{table:weight_rhyme_score}.
+The weights assigned to each score were fine-tuned with manual adjustment, leading to the final weights in table \ref{table:weight_rhyme_score}.
 
 \begin{table}[ht]
 \centering
-\begin{tabular}{c c c}
+\begin{tabular}{lll c c c}
 	\hline\hline
 	RCPM & OPM & SCM \\ [0.5ex]
 	\hline
@@ -199,7 +201,7 @@ The weights assigned to each score were fine-tuned with manual adjustment, leadi
 \label{fig:rhymescorecode}
 \end{figure}
 
-Some examples of rhyme scores are shown in the code example in \ref{fig:rhymescorecode}. There are two more additions for some edge cases:
+Some examples of rhyme scores are shown in the code example in figure \ref{fig:rhymescorecode}. There were also some additions for special cases that were observed during testing:
 
 \begin{tight_enumerate}
 	\vspace{-0.5em}
@@ -207,57 +209,9 @@ Some examples of rhyme scores are shown in the code example in \ref{fig:rhymesco
 		Identical words have their rhyme score set to 0. As a rule, a word shouldn't rhyme with itself in the generated couplets.
 	\item
 		Longer rhymes are preferred, up to a ceiling of 6 phonemes. Without this factor, single-syllable words dominate the rhyme score, and multi-syllable words are more interesting in a couplet.
-\end{tight_enumerate}
-
-\subsubsection{Multiple pronunciations and sense disambiguation}
-
-A considerable problem encountered was that of associating the different pronunciations of homographs with their respective senses or parts of speech. \citet{hopkins-kiela-2017} summarize the problem as follows:
-
-\begin{quote}
-Pronunciation dictionaries have often been used to determine the syllabic stresses of words, but suffer from some limitations [...]. All word pronunciations are considered equiprobable, including archaic and uncommon pronunciations, and pronunciations are provided context free, despite the importance of context for pronunciation.
-\end{quote}
-
-\begin{figure}
-\begin{Verbatim}[fontsize=\small]
-
->>> from nltk.corpus import wordnet, cmudict
->>> cmudict.dict()['bow']
-[['B', 'AW1'], ['B', 'OW1']]
->>>
->>> wordnet.synsets('bow')
-[Synset('bow.n.01'), Synset('bow.n.02'),
- Synset('bow.n.03'), Synset('bow.n.04'),
- Synset('bow.n.05'), Synset('bow.n.06'),
- Synset('bow.n.07'), Synset('bow.n.08'),
- Synset('bow.n.09'), Synset('bow.v.01'),
- Synset('submit.v.06'), Synset('bow.v.03'),
- Synset('crouch.v.01'), Synset('bow.v.05')]
->>>
->>> cmudict.dict()['defect']
-[['D', 'IY1', 'F', 'EH0', 'K', 'T'],
- ['D', 'IH0', 'F', 'EH1', 'K', 'T']]
->>>
->>> wordnet.synsets('defect')
-[Synset('defect.n.01'),
- Synset('defect.n.02'),
- Synset('defect.n.03'),
- Synset('blemish.n.01'),
- Synset('defect.v.01')]
-\end{Verbatim}
-\caption{Examples of independent pronunciation and word sense ambiguity}
-\label{fig:wordnet}
-\end{figure}
-
-Consider two illustrating examples:
-\begin{tight_enumerate}
-	\vspace{-0.5em}
 	\item
-		``bow'' can be pronounced like ``cow'', or like ``snow''.
-	\item
-		``defect'' can be pronounced with a beginning emphasis, i.e. ``DEE-fect'', the noun, or with an end emphasis, ``de-FECT'', the verb.
+		To resolve the case of multiple possible pronunciations, rhyme score returns the maximum score across all the permutations of the different pronunciations for word $a$ and word $b$, similar to \citet{keswarani}. A discussion on the deficiencies of this method is discussed in section \ref{sec:synset}.
 \end{tight_enumerate}
-
-These are complex ambiguities, illustrated alongside their WordNet synsets and parts of speech in figure \ref{fig:wordnet}. This can only be resolved with a lexical resource that provides combined sense and pronunciation disambiguation. One attempted solution was to penalize words with multiple pronunciations by dividing the rhyme score by the total number of pronunciation permutations. However this led to the rhyme score being unable to find any good rhymes. \citet{keswarani} ignored senses for simplicity and took the maximum rhyme score of all the permutations of the different pronunciations of word $a$ and word $b$ -- the same approach was followed in this paper.
 
 \subsubsection{Word embedding}
 \label{sec:fasttext}
@@ -355,11 +309,11 @@ To score a couplet, a weighted sum of multiple metrics was used to compute a sin
 		It would be unfeasible due to computational cost to use all 331,713 Gutenberg couplets as an input, so a limited subset had to be selected. A random selection of 5,000 couplets was used as the reference. Finally, several evaluation runs were done with different RNG seeds, and the total METEOR score was relatively stable across all runs. This concluded that randomization didn't influence the scores strongly.
 \end{tight_itemize}
 
-The weights assigned to each score were again fine-tuned with manual adjustment, leading to the final weight table in \ref{table:weight_couplet_score}.
+The weights assigned to each score were again fine-tuned with manual adjustment, leading to the final weights in table \ref{table:weight_couplet_score}.
 
 \begin{table}[ht]
 \centering
-\begin{tabular}{c c c c}
+\begin{tabular}{llll c c c c}
 	\hline\hline
 	Rhyme & Stress & Semantic & NLG \\ [0.5ex]
 	\hline
@@ -370,14 +324,93 @@ The weights assigned to each score were again fine-tuned with manual adjustment,
 \label{table:weight_couplet_score}
 \end{table}
 
-\textcolor{blue}{
 \subsection{Results}
 \label{sec:results}
 \subsubsection{Quantitative assessment}
-Show the stats here of rhyme score of 1000 random couplets from each of the 2 good poetry baselines, 1 bad prose baseline, our custom models
+
+The results in table \ref{table:couplet_results} are evaluated on 999 couplets randomly selected from the baselines and \textit{prose2poetry} generator models. Scores are shown for the total couplet score, as well as each of the 4 subcomponents (rhyme score, stress score, doc2vec score, METEOR score), to provide a finer-grained analysis of trends in the couplet scoring.
+
+The prose baseline was created by selecting random sentence pairs from the input English novel corpus, without any filtering, to demonstrate that consecutive sentences drawn from the input prose corpus do not make good rhyming couplets. The naive generator dataset was created by selecting random sentence pairs from the input corpus, with the pronouncingpy \verb|rhymes()| filter on the end words. This finds non-consecutive sentences in the novel that have end rhymes (by random chance).
+
+\begin{table*}[ht]
+\begin{subtable}{0.5\textwidth}
+\begin{tabular}{llll c c c c}
+	\hline\hline
+	Score & Mean & Stddev & .95 quantile \\ [0.5ex]
+	\hline
+	\textbf{Couplet} & 0.45 & 0.11 & 0.66 \\ [0.5ex]
+	\hline
+	Rhyme & 0.41 & 0.15 & 0.70 \\ [0.5ex]
+	\hline
+	Stress & 0.69 & 0.14 & 0.90 \\ [0.5ex]
+	\hline
+	doc2vec & 0.53 & 0.13 & 0.75 \\ [0.5ex]
+	\hline
+	METEOR & 0.41 & 0.112 & 0.56 \\ [0.5ex]
+	\hline
+\end{tabular}
+\caption{Gold standard baseline, Gutenberg}\label{tab:results_a}
+\end{subtable}
+\begin{subtable}{0.5\textwidth}
+\begin{tabular}{llll c c c c}
+	\hline\hline
+	Score & Mean & Stddev & .95 quantile \\ [0.5ex]
+	\hline
+	\textbf{Couplet} & 0.45 & 0.11 & 0.67 \\ [0.5ex]
+	\hline
+	Rhyme & 0.42 & 0.16 & 0.73 \\ [0.5ex]
+	\hline
+	Stress & 0.66 & 0.15 & 0.90 \\ [0.5ex]
+	\hline
+	doc2vec & 0.56 & 0.14 & 0.79 \\ [0.5ex]
+	\hline
+	METEOR & 0.39 & 0.10 & 0.53 \\ [0.5ex]
+	\hline
+\end{tabular}
+\caption{Silver standard baseline, PoetryFoundation}\label{tab:results_a}
+\end{subtable}
+\begin{subtable}{0.5\textwidth}
+\begin{tabular}{llll c c c c}
+	\hline\hline
+	Score & Mean & Stddev & .95 quantile \\ [0.5ex]
+	\hline
+	\textbf{Couplet} & 0.20 & 0.07 & 0.32 \\ [0.5ex]
+	\hline
+	Rhyme & 0.07 & 0.08 & 0.22 \\ [0.5ex]
+	\hline
+	Stress & 0.47 & 0.20 & 0.77 \\ [0.5ex]
+	\hline
+	doc2vec & 0.68 & 0.14 & 0.89 \\ [0.5ex]
+	\hline
+	METEOR & 0.37 & 0.07 & 0.48 \\ [0.5ex]
+	\hline
+\end{tabular}
+\caption{Prose baseline}\label{tab:results_a}
+\end{subtable}
+\begin{subtable}{0.5\textwidth}
+\begin{tabular}{llll c c c c}
+	\hline
+	Score & Mean & Stddev & .95 quantile \\ [0.5ex]
+	\hline
+	\textbf{Couplet} & 0.20 & 0.07 & 0.32 \\ [0.5ex]
+	\hline
+	Rhyme & 0.07 & 0.08 & 0.22 \\ [0.5ex]
+	\hline
+	Stress & 0.47 & 0.20 & 0.77 \\ [0.5ex]
+	\hline
+	doc2vec & 0.68 & 0.14 & 0.89 \\ [0.5ex]
+	\hline
+	METEOR & 0.37 & 0.07 & 0.48 \\ [0.5ex]
+	\hline
+\end{tabular}
+\caption{prose2poetry generator}
+\end{subtable}
+\caption{Couplet scoring results}
+\label{table:couplet_results}
+\end{table*}
+
 \subsubsection{Qualitative assessment}
 Put good generated poem and bad generated poem
-}
 
 %%%%%%%%%%%%%%
 % DISC & CONC		%
@@ -388,6 +421,58 @@ Put good generated poem and bad generated poem
 fmilot: I can help on this one once the results are putted there.
 }
 
+\subsection{Multiple pronunciations and sense disambiguation}
+\label{sec:synset}
+
+A considerable problem encountered in the rhyme score was that of associating the different pronunciations of homographs with their respective senses or parts of speech. \citet{hopkins-kiela-2017} summarize the problem as follows:
+
+\begin{quote}
+Pronunciation dictionaries have often been used to determine the syllabic stresses of words, but suffer from some limitations [...]. All word pronunciations are considered equiprobable, including archaic and uncommon pronunciations, and pronunciations are provided context free, despite the importance of context for pronunciation.
+\end{quote}
+
+\begin{figure}
+\begin{Verbatim}[fontsize=\small]
+
+>>> from nltk.corpus import wordnet, cmudict
+>>> cmudict.dict()['bow']
+[['B', 'AW1'], ['B', 'OW1']]
+>>>
+>>> wordnet.synsets('bow')
+[Synset('bow.n.01'), Synset('bow.n.02'),
+ Synset('bow.n.03'), Synset('bow.n.04'),
+ Synset('bow.n.05'), Synset('bow.n.06'),
+ Synset('bow.n.07'), Synset('bow.n.08'),
+ Synset('bow.n.09'), Synset('bow.v.01'),
+ Synset('submit.v.06'), Synset('bow.v.03'),
+ Synset('crouch.v.01'), Synset('bow.v.05')]
+>>>
+>>> cmudict.dict()['defect']
+[['D', 'IY1', 'F', 'EH0', 'K', 'T'],
+ ['D', 'IH0', 'F', 'EH1', 'K', 'T']]
+>>>
+>>> wordnet.synsets('defect')
+[Synset('defect.n.01'),
+ Synset('defect.n.02'),
+ Synset('defect.n.03'),
+ Synset('blemish.n.01'),
+ Synset('defect.v.01')]
+\end{Verbatim}
+\caption{Examples of independent pronunciation and word sense ambiguity}
+\label{fig:wordnet}
+\end{figure}
+
+Consider two illustrating examples:
+\begin{tight_enumerate}
+	\vspace{-0.5em}
+	\item
+		``bow'' can be pronounced like ``cow'', or like ``snow''.
+	\item
+		``defect'' can be pronounced with a beginning emphasis, i.e. ``DEE-fect'', the noun, or with an end emphasis, ``de-FECT'', the verb.
+\end{tight_enumerate}
+
+These are complex ambiguities, illustrated alongside their WordNet synsets and parts of speech in figure \ref{fig:wordnet}. This can only be resolved with a lexical resource that provides combined sense and pronunciation disambiguation. One attempted solution was to penalize words with multiple pronunciations by dividing the rhyme score by the total number of pronunciation permutations. However this led to the rhyme score being unable to find any good rhymes.
+
+The final approach chosen in this paper was to ignore this ambiguity and simply return the best rhyme score across all possible pronunciation permutations between two words.
 
 %%%%%%%%%%%%%%
 % STAT OF CONT		%
@@ -400,7 +485,5 @@ Sophie Bullman worked on the backward sentence generation. François Milot devel
 
 \bibliographystyle{acl_natbib}
 \bibliography{final_report}
-
-
 
 \end{document}

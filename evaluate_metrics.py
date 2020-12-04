@@ -15,11 +15,7 @@ from tabulate import tabulate
 def compute_stats(scores):
     return (
         numpy.mean(scores, axis=0),
-        numpy.median(scores, axis=0),
         numpy.std(scores, axis=0),
-        numpy.var(scores, axis=0),
-        numpy.ptp(scores, axis=0),
-        numpy.quantile(scores, 0.75, axis=0),
         numpy.quantile(scores, 0.95, axis=0),
     )
 
@@ -145,11 +141,7 @@ def main():
         headers = [
             "metric",
             "mean",
-            "median",
             "std",
-            "var",
-            "ptp",
-            ".75 quantile",
             ".95 quantile",
         ]
         metrics = ["total", "rhyme", "stress", "semantic", "meteor"]
@@ -161,10 +153,6 @@ def main():
                     stats[0][i],
                     stats[1][i],
                     stats[2][i],
-                    stats[3][i],
-                    stats[4][i],
-                    stats[5][i],
-                    stats[6][i],
                 ]
             )
 
