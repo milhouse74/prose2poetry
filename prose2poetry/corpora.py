@@ -8,6 +8,7 @@ import string
 import pandas
 import itertools
 import random
+import re
 
 nltk.download("gutenberg")
 _data_path = pathlib.Path(__file__).parent.absolute().joinpath("../data")
@@ -133,7 +134,7 @@ class PFCouplets:
 
         for poem in pf_csvs.itertuples():
             # clean up the poem
-            poem_lines = poem.Poem.split("\r\r\n")
+            poem_lines = re.split("\r\r\n|\r", poem.Poem)
             poem_lines = [p.strip() for p in poem_lines]
             poem_lines = [p for p in poem_lines if p and p not in string.punctuation]
 

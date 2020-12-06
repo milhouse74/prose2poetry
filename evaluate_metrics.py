@@ -15,17 +15,13 @@ from tabulate import tabulate
 def compute_stats(scores):
     return (
         numpy.mean(scores, axis=0),
-        numpy.median(scores, axis=0),
         numpy.std(scores, axis=0),
-        numpy.var(scores, axis=0),
-        numpy.ptp(scores, axis=0),
-        numpy.quantile(scores, 0.75, axis=0),
         numpy.quantile(scores, 0.95, axis=0),
     )
 
 
 def score_couplets(couplets, scorer):
-    scores = numpy.ndarray(shape=(len(couplets), 5), dtype=numpy.float64)
+    scores = numpy.ndarray(shape=(len(couplets), 4), dtype=numpy.float64)
 
     for i, couplet in enumerate(couplets):
         scores[i] = scorer.calculate_scores(couplet)
@@ -145,30 +141,36 @@ def main():
         headers = [
             "metric",
             "mean",
-            "median",
             "std",
-            "var",
-            "ptp",
-            ".75 quantile",
             ".95 quantile",
         ]
-        metrics = ["total", "rhyme", "stress", "semantic", "meteor"]
+        metrics = ["total", "stress", "semantic", "meteor"]
         table = []
-        for i, metric_name in enumerate(metrics):
+        for j, metric_name in enumerate(metrics):
             table.append(
                 [
                     metric_name,
-                    stats[0][i],
-                    stats[1][i],
-                    stats[2][i],
-                    stats[3][i],
-                    stats[4][i],
-                    stats[5][i],
-                    stats[6][i],
+                    stats[0][j],
+                    stats[1][j],
+                    stats[2][j],
                 ]
             )
 
+        # get top .95 quantile couplets
+        couplet_scores = scores_ndarray[:, 0]
+        top95q_indices = numpy.argwhere(couplet_scores >= stats[2][0])
         print(tabulate(table, headers, tablefmt="github"))
+
+        print("\ntop 5% couplets:")
+        for idx in top95q_indices:
+            if i == 0:
+                print(couplets_1[idx[0]])
+            elif i == 3:
+                print(couplets_2[idx[0]])
+            elif i == 6:
+                print(couplets_3[idx[0]])
+            elif i == 9:
+                print(couplets_4[idx[0]])
 
     return 0
 
