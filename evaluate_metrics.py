@@ -3,7 +3,8 @@
 import sys
 from prose2poetry.corpora import ProseCorpus, GutenbergCouplets, PFCouplets, pairs
 from prose2poetry.couplet_score import CoupletScorer
-from prose2poetry.generators import NaiveGenerator
+from prose2poetry.generators import NaiveGenerator, MarkovChainGenerator
+from prose2poetry.vector_models import FasttextModel
 import argparse
 import numpy
 import random
@@ -56,6 +57,12 @@ def main():
         help="Integer seed for rng",
     )
 
+    parser.add_argument(
+        "--memory-growth",
+        action="store_true",
+        help="Allow TF GPU memory growth (useful for nvidia RTX 2xxx cards)",
+    )
+
     args = parser.parse_args()
 
     pool = multiprocessing.Pool(args.n_pool)
@@ -82,6 +89,34 @@ def main():
     gen = NaiveGenerator(prose_corpus)
     couplets_4 = gen.generate_couplets(n=args.n_eval)
 
+    ft_model = FasttextModel(prose_corpus)
+
+    seed_words = ['love', 'hate', 'pride', 'prejudice', 'justice', 'romance']
+
+    # get at least 5x top_n semantically similar words to increase the chances of finding good rhyming pairs among them
+    semantic_sim_words = ft_model.get_top_n_semantic_similar(
+        seed_words, n=(5 * 200)
+    )
+
+    # deduplicate
+    semantic_sim_words = list(set(semantic_sim_words))
+
+    semantic_sim_words.extend(seed_words)
+    rhyme_pairs = itertools.combinations(semantic_sim_words, 2)
+
+    all_results = []
+    for rp in rhyme_pairs:
+        # use a combined score which incorporates rhyme and semantic score
+        all_results.append((ft_model.combined_score(rp[0], rp[1]), rp[0], rp[1]))
+
+    # sort in reverse order
+    all_results = sorted(all_results, key=lambda x: x[0], reverse=True)
+
+    gen2 = MarkovChainGenerator(prose_corpus, memory_growth=args.memory_growth)
+
+    # return is a set, cast it to a list
+    couplets_5 = list(gen2.generate_couplets(all_results, n=args.n_eval))
+
     third = int(args.n_eval / 3)
 
     scores = list(
@@ -101,6 +136,9 @@ def main():
                     couplets_4[:third],
                     couplets_4[third : 2 * third],
                     couplets_4[2 * third :],
+                    couplets_5[:third],
+                    couplets_5[third : 2 * third],
+                    couplets_5[2 * third :],
                 ],
                 itertools.repeat(couplet_scorer),
             ),
@@ -137,6 +175,13 @@ def main():
                     scores_ndarray.shape[0]
                 )
             )
+        elif i == 12:
+            print(
+                "\nMarkov generator, {0} couplets\n----------------------------------------------\n".format(
+                    scores_ndarray.shape[0]
+                )
+            )
+
 
         headers = [
             "metric",
@@ -171,6 +216,8 @@ def main():
                 print(couplets_3[idx[0]])
             elif i == 9:
                 print(couplets_4[idx[0]])
+            elif i == 12:
+                print(couplets_5[idx[0]])
 
     return 0
 

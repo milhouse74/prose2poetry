@@ -12,6 +12,8 @@ from gensim.models import FastText
 import math
 import pathlib
 import matplotlib.pyplot as plt
+import markovify
+import time
 
 
 def _train_and_save_model_lstm_1(prose_corpus, ft_model, vocab, model_path, memory=5):
@@ -150,4 +152,60 @@ class NaiveGenerator:
                     " ".join(min(self.last_words[pair[1]], key=len)),
                 ]
             )
+        return ret
+
+
+class MarkovChainGenerator:
+    def __init__(self, prose_corpus, memory_growth=False):
+        if memory_growth:
+            physical_devices = tensorflow.config.list_physical_devices("GPU")
+            tensorflow.config.experimental.set_memory_growth(
+                physical_devices[0], enable=True
+            )
+
+        self.markov_model = markovify.NewlineText(
+            "\n".join(prose_corpus.joined_sents_with_punct)
+        )
+
+    def generate_sentence(self, end_word):
+        return self.markov_model.make_sentence_that_finish(end_word)
+
+    def generate_couplets(self, rhyming_pairs, n=10):
+        ret = set()
+        iters = 0
+        n_old = 0
+        while len(ret) < n:
+            print('here we go!')
+            for rhyming_pair in rhyming_pairs:
+                print('rhyming pair: {0}'.format(rhyming_pair))
+                try:
+                    # rhyming_pair[0] is the rhyme score
+                    # tuples of strings are hashable
+                    ret.add(
+                        (
+                            self.markov_model.make_sentence_that_finish(
+                                rhyming_pair[1]
+                            ),
+                            self.markov_model.make_sentence_that_finish(
+                                rhyming_pair[2]
+                            ),
+                        )
+                    )
+                except Exception:
+                    pass
+                print('currently at {0} couplets'.format(len(ret)))
+
+                if len(ret) >= n:
+                    return ret
+                continue
+            # reached end of rhyming pair list
+            n_new = len(ret)
+            iters += 1
+            if n_new == n_old:
+                print('exhausted at {0} couplets'.format(n_new))
+                return ret
+            else:
+                print('appended {0} new couplets'.format(n_new - n_old))
+            n_old = n_new
+
         return ret

@@ -5,7 +5,7 @@ import itertools
 from prose2poetry.vector_models import FasttextModel
 from prose2poetry.couplet_score import CoupletScorer
 from prose2poetry.corpora import ProseCorpus, GutenbergCouplets
-from prose2poetry.generators import NaiveGenerator, LSTMModel1
+from prose2poetry.generators import MarkovChainGenerator
 import argparse
 import random
 
@@ -19,7 +19,7 @@ def main():
     parser.add_argument(
         "--top-n",
         type=int,
-        default=10,
+        default=200,
         help="Top n combined rhyme/semantic scores to return",
     )
 
@@ -89,26 +89,12 @@ def main():
     # sort in reverse order
     all_results = sorted(all_results, key=lambda x: x[0], reverse=True)
 
-    generator2 = LSTMModel1(corpus, ft_model, memory_growth=args.memory_growth)
-    print("top {0} results for seed words {1}".format(args.top_n, args.seed_words))
-    for a in all_results[: args.top_n]:
-        print(
-            "combined (semantic, rhyme) score of {0}, {1}: {2}".format(a[1], a[2], a[0])
-        )
-        sent1 = generator2.generate_sentence(a[1])
-        sent2 = generator2.generate_sentence(a[2])
+    generator = MarkovChainGenerator(corpus, memory_growth=args.memory_growth)
 
-        print("LSTM-generated couplet:\n\t{0}\n\t{1}".format(sent1, sent2))
-
-    generator1 = NaiveGenerator(corpus)
-    naive_couplets = generator1.generate_couplets()
-
-    for nc in naive_couplets:
-        print(
-            "evaluating couplet:\n{0}\nscore: {1}".format(
-                nc, couplet_scorer.calculate_scores(nc)
-            )
-        )
+    couplets = generator.generate_couplets(all_results, n=1000)
+    for couplet in couplets:
+        print("Markov chain generated couplet:\n\t{0}".format(couplet))
+        print("\tscore: {0}".format(couplet_scorer.calculate_scores(couplet)[0]))
 
     return 0
 

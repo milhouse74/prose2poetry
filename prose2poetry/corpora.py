@@ -27,11 +27,14 @@ def pairs(seq):
 
 class ProseCorpus:
     ### set default prose dataset
-    default_gutenberg_prose_subset = ["austen-emma.txt"]
+    default_gutenberg_prose_subset = [
+        "austen-emma.txt",
+    ]
 
     def __init__(self, custom_gutenberg_fileids=None, custom_corpus=None):
         self.sents = None
         self.joined_sents = None
+        self.joined_sents_with_punct = None
         self.words = None
 
         if custom_corpus:
@@ -45,6 +48,7 @@ class ProseCorpus:
 
             self.sents = []
             self.joined_sents = []
+            self.joined_sents_with_punct = []
             self.words = []
 
             for gutenberg_fileid in gutenberg_fileids:
@@ -67,6 +71,8 @@ class ProseCorpus:
                         ##################################
                         # apply other preprocessing here #
                         ##################################
+
+                        self.joined_sents_with_punct.append(" ".join(c))
 
                         if len(c) == 1 and not any(cc.isalpha() for cc in c[0]):
                             continue
