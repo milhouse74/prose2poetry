@@ -3,7 +3,7 @@ from collections import defaultdict
 import pronouncing
 import numpy
 from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import Dense, Dropout, LSTM
+from tensorflow.keras.layers import Dense, Dropout, LSTM, GRU, SimpleRNN
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.losses import MeanSquaredError
 import tensorflow
@@ -11,9 +11,11 @@ from nltk.corpus import gutenberg
 from gensim.models import FastText
 import math
 import pathlib
+import matplotlib.pyplot as plt
 
 
-def _train_and_save_model_lstm_1(prose_corpus, ft_model, vocab, model_path, memory=10):
+def _train_and_save_model_lstm_1(prose_corpus, ft_model, vocab, model_path, memory=5):
+
     data = numpy.asarray(prose_corpus.words)
 
     # Embedding and one-hot
@@ -42,23 +44,34 @@ def _train_and_save_model_lstm_1(prose_corpus, ft_model, vocab, model_path, memo
 
     # Create model
     model = Sequential()
-    model.add(LSTM(256, input_shape=(dataX.shape[1], dataX.shape[2])))
+    model.add(LSTM(128, input_shape=(dataX.shape[1], dataX.shape[2])))
     model.add(Dense(dataY.shape[1], activation="softmax"))
     model.compile(loss="categorical_crossentropy", optimizer="adam")
 
-    model.fit(dataX, dataY, epochs=2000, batch_size=512)
+    model.summary()
+
+    history = model.fit(dataX, dataY, epochs=200, batch_size=128, validation_split=0.20)
+    loss_train = history.history['loss']
+    loss_val = history.history['val_loss']
+
+    # show learning graph
+    plt.plot(loss_train, label="Training")
+    plt.plot(loss_val, label="Validation")
+    plt.title('Training Curves')
+    plt.legend()
+    plt.show()
 
     # Save model
     model.save(model_path)
 
-    return model
+    return model, loss_train, loss_val
 
 
 class LSTMModel1:
     models_path = pathlib.Path(__file__).parent.absolute().joinpath("../models")
     model_path = models_path.joinpath("sequence_model_1")
 
-    def __init__(self, prose_corpus, ft_model, memory=10, memory_growth=False):
+    def __init__(self, prose_corpus, ft_model, memory=5, memory_growth=False):
         # we passed our own FasttextModel wrapper, use the inner ft_model class member
         self.ft_model = ft_model.ft_model
 
@@ -76,12 +89,12 @@ class LSTMModel1:
             self.model = load_model(LSTMModel1.model_path)
         except Exception as e:
             print("could not load model, training...")
-            self.model = _train_and_save_model_lstm_1(
+            self.model, _, _ = _train_and_save_model_lstm_1(
                 prose_corpus,
                 self.ft_model,
                 self.vocab,
                 LSTMModel1.model_path,
-                memory=memory,
+                memory=memory
             )
 
     def generate_sentence(self, end_word):
