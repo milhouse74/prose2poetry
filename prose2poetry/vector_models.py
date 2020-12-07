@@ -1,6 +1,5 @@
 from gensim.models import FastText
 from nltk.corpus import stopwords
-from .rhyme_score import rhyme_score
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from nltk.tokenize import word_tokenize
 import pathlib
@@ -30,7 +29,6 @@ def _train_and_save_model_ft(sents, model_path):
 class FasttextModel:
     models_path = pathlib.Path(__file__).parent.absolute().joinpath("../models")
     model_path = models_path.joinpath("fasttext.bin")
-    rhyme_weight = 0.80
 
     def __init__(self, prose_corpus):
         self.ft_model = None
@@ -46,7 +44,7 @@ class FasttextModel:
         ret_filtered = []
         for seed_word in seed_words:
             similar_word_tmp = [
-                w[0] for w in self.ft_model.wv.most_similar(seed_word, topn=2 * n)
+                w[0] for w in self.ft_model.wv.most_similar(seed_word, topn=4 * n)
             ]
             ret_filtered.extend(_post_filter_processing_ft(similar_word_tmp)[:n])
 
@@ -57,15 +55,10 @@ class FasttextModel:
             self.ft_model.wv.similarity(w1=word1, w2=word2) + 1
         ) / 2  # normalizing the score between 0-1
 
-    def rhyme_score(self, word1, word2):
-        return rhyme_score(word1, word2)
-
-    def combined_score(self, word1, word2, rhyme_weight=None):
-        if not rhyme_weight:
-            rhyme_weight = FasttextModel.rhyme_weight
-        return self.rhyme_score(word1, word2) * rhyme_weight + self.semantic_score(
-            word1, word2
-        ) * (1 - rhyme_weight)
+    def combined_score(self, word1, word2):
+        if not word1 in pronouncing.rhymes(word2):
+            return 0
+        return self.semantic_score(word1, word2)
 
 
 ### Doc2Vec
