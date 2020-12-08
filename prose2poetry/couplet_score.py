@@ -8,9 +8,10 @@ from .vector_models import Doc2vecModel
 
 class CoupletScorer:
     ### combined score weights
-    stress_weight = 0.4
-    semantic_weight = 0.2
-    meteor_weight = 0.2
+    rhyme_weight = 0.5
+    stress_weight = 0.2
+    semantic_weight = 0.15
+    meteor_weight = 0.15
 
     def __init__(self, reference_corpus):
         self.semantic_scorer = Doc2vecModel(reference_corpus)
@@ -25,6 +26,7 @@ class CoupletScorer:
         num_words = 0
         stress_strings = []
         all_poem_words = []
+        last_words = []
 
         for pl in poem_lines:
             try:
@@ -33,6 +35,7 @@ class CoupletScorer:
                 pwords = pl
 
             num_words += len(pwords)
+            last_words.append(pwords[-1])
             all_poem_words.extend(pwords)
 
             stress_string = ""
@@ -45,6 +48,9 @@ class CoupletScorer:
                     pass
 
             stress_strings.append(stress_string)
+
+        ### rhyme score
+        rhyme_score_ = rhyme_score(last_words[0], last_words[1])
 
         ### stress score
         stress_string_score = difflib.SequenceMatcher(
@@ -65,12 +71,14 @@ class CoupletScorer:
 
         ### combined score
         ret = (
-            CoupletScorer.stress_weight * stress_string_score
+            CoupletScorer.rhyme_weight * rhyme_score_
+            + CoupletScorer.stress_weight * stress_string_score
             + CoupletScorer.semantic_weight * semantic_score
             + CoupletScorer.meteor_weight * meteor_score_combined
         )
         return [
             ret,
+            rhyme_score_,
             stress_string_score,
             semantic_score,
             meteor_score_combined,

@@ -3,7 +3,8 @@
 import sys
 from prose2poetry.corpora import ProseCorpus, GutenbergCouplets, PFCouplets, pairs
 from prose2poetry.couplet_score import CoupletScorer
-from prose2poetry.generators import NaiveGenerator
+from prose2poetry.generators import NaiveGenerator, MarkovChainGenerator, LSTMModel1
+from prose2poetry.vector_models import FasttextModel
 import argparse
 import numpy
 import random
@@ -21,7 +22,7 @@ def compute_stats(scores):
 
 
 def score_couplets(couplets, scorer):
-    scores = numpy.ndarray(shape=(len(couplets), 4), dtype=numpy.float64)
+    scores = numpy.ndarray(shape=(len(couplets), 5), dtype=numpy.float64)
 
     for i, couplet in enumerate(couplets):
         scores[i] = scorer.calculate_scores(couplet)
@@ -38,7 +39,7 @@ def main():
     parser.add_argument(
         "--n-eval",
         type=int,
-        default=999,
+        default=1000,
         help="Number of couplets to sample for evaluation from all corpora/generators",
     )
 
@@ -54,6 +55,12 @@ def main():
         type=int,
         default=42,
         help="Integer seed for rng",
+    )
+
+    parser.add_argument(
+        "--memory-growth",
+        action="store_true",
+        help="Allow TF GPU memory growth (useful for nvidia RTX 2xxx cards)",
     )
 
     args = parser.parse_args()
@@ -82,34 +89,75 @@ def main():
     gen = NaiveGenerator(prose_corpus)
     couplets_4 = gen.generate_couplets(n=args.n_eval)
 
-    third = int(args.n_eval / 3)
+    ft_model = FasttextModel(prose_corpus)
+
+    seed_words = ["love", "hate", "pride", "prejudice", "justice", "romance"]
+
+    # get at least 5x top_n semantically similar words to increase the chances of finding good rhyming pairs among them
+    semantic_sim_words = ft_model.get_top_n_semantic_similar(seed_words, n=(5 * 200))
+
+    # deduplicate
+    semantic_sim_words = list(set(semantic_sim_words))
+
+    semantic_sim_words.extend(seed_words)
+    rhyme_pairs = itertools.combinations(semantic_sim_words, 2)
+
+    all_results = []
+    for rp in rhyme_pairs:
+        # use a combined score which incorporates rhyme and semantic score
+        all_results.append((ft_model.combined_score(rp[0], rp[1]), rp[0], rp[1]))
+
+    # sort in reverse order
+    all_results = sorted(all_results, key=lambda x: x[0], reverse=True)
+
+    gen2 = MarkovChainGenerator(prose_corpus, memory_growth=args.memory_growth)
+    gen3 = LSTMModel1(prose_corpus, ft_model, memory_growth=args.memory_growth)
+
+    # return is a set, cast it to a list
+    couplets_5 = list(gen2.generate_couplets(all_results, n=args.n_eval))
+
+    couplets_6 = list(gen3.generate_couplets(all_results, n=args.n_eval))
+
+    quarter = int(args.n_eval / 4)
 
     scores = list(
         pool.starmap(
             score_couplets,
             zip(
                 [
-                    couplets_1[:third],
-                    couplets_1[third : 2 * third],
-                    couplets_1[2 * third :],
-                    couplets_2[:third],
-                    couplets_2[third : 2 * third],
-                    couplets_2[2 * third :],
-                    couplets_3[:third],
-                    couplets_3[third : 2 * third],
-                    couplets_3[2 * third :],
-                    couplets_4[:third],
-                    couplets_4[third : 2 * third],
-                    couplets_4[2 * third :],
+                    couplets_1[:quarter],
+                    couplets_1[quarter:2*quarter],
+                    couplets_1[2*quarter:3*quarter],
+                    couplets_1[3*quarter:],
+                    couplets_2[:quarter],
+                    couplets_2[quarter:2*quarter],
+                    couplets_2[2*quarter:3*quarter],
+                    couplets_2[3*quarter:],
+                    couplets_3[:quarter],
+                    couplets_3[quarter:2*quarter],
+                    couplets_3[2*quarter:3*quarter],
+                    couplets_3[3*quarter:],
+                    couplets_4[:quarter],
+                    couplets_4[quarter:2*quarter],
+                    couplets_4[2*quarter:3*quarter],
+                    couplets_4[3*quarter:],
+                    couplets_5[:quarter],
+                    couplets_5[quarter:2*quarter],
+                    couplets_5[2*quarter:3*quarter],
+                    couplets_5[3*quarter:],
+                    couplets_6[:quarter],
+                    couplets_6[quarter:2*quarter],
+                    couplets_6[2*quarter:3*quarter],
+                    couplets_6[3*quarter:],
                 ],
                 itertools.repeat(couplet_scorer),
             ),
         )
     )
 
-    for i in range(0, len(scores), 3):
+    for i in range(0, len(scores), 4):
         scores_ndarray = numpy.concatenate(
-            (scores[i], scores[i + 1], scores[i + 2]), axis=0
+            (scores[i], scores[i + 1], scores[i + 2], scores[i + 3]), axis=0
         )
         stats = compute_stats(scores_ndarray)
 
@@ -119,21 +167,33 @@ def main():
                     scores_ndarray.shape[0]
                 )
             )
-        elif i == 3:
+        elif i == 4:
             print(
                 "\nPoetryFoundation, {0} couplets\n----------------------------------------------\n".format(
                     scores_ndarray.shape[0]
                 )
             )
-        elif i == 6:
+        elif i == 8:
             print(
                 "\nProse, {0} couplets\n----------------------------------------------\n".format(
                     scores_ndarray.shape[0]
                 )
             )
-        elif i == 9:
+        elif i == 12:
             print(
                 "\nNaive generator, {0} couplets\n----------------------------------------------\n".format(
+                    scores_ndarray.shape[0]
+                )
+            )
+        elif i == 16:
+            print(
+                "\nMarkov generator, {0} couplets\n----------------------------------------------\n".format(
+                    scores_ndarray.shape[0]
+                )
+            )
+        elif i == 20:
+            print(
+                "\nLSTM generator, {0} couplets\n----------------------------------------------\n".format(
                     scores_ndarray.shape[0]
                 )
             )
@@ -144,7 +204,7 @@ def main():
             "std",
             ".95 quantile",
         ]
-        metrics = ["total", "stress", "semantic", "meteor"]
+        metrics = ["total", "rhyme", "stress", "semantic", "meteor"]
         table = []
         for j, metric_name in enumerate(metrics):
             table.append(
@@ -165,12 +225,16 @@ def main():
         for idx in top95q_indices:
             if i == 0:
                 print(couplets_1[idx[0]])
-            elif i == 3:
+            elif i == 4:
                 print(couplets_2[idx[0]])
-            elif i == 6:
+            elif i == 8:
                 print(couplets_3[idx[0]])
-            elif i == 9:
+            elif i == 12:
                 print(couplets_4[idx[0]])
+            elif i == 16:
+                print(couplets_5[idx[0]])
+            elif i == 20:
+                print(couplets_6[idx[0]])
 
     return 0
 

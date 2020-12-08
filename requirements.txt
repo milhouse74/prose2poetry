@@ -8,3 +8,4 @@ pandas
 tabulate
 keras
 tensorflow>=2.2
+git+git://github.com/Sylv-Lej/markovify@make_sentence_that_contains#egg=markovify
