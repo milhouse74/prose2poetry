@@ -13,6 +13,7 @@ import math
 import pathlib
 import matplotlib.pyplot as plt
 import markovify
+import random
 import time
 
 
@@ -104,7 +105,7 @@ class LSTMModel1:
         gen_sent = [
             gen_word_i,
         ]
-        for i in range(20):
+        while gen_word_i not in ['.', ';', '!', '?']:
             memory_adjusted = min(self.memory, len(gen_sent))
 
             pred = numpy.asarray(
@@ -115,10 +116,10 @@ class LSTMModel1:
                 (1, memory_adjusted, pred.shape[1]),
             )
             prediction = self.model.predict(to_predict, verbose=0)
-            gen_word_i = self.vocab[numpy.argmax(prediction[-1])]
+            gen_word_i = self.vocab[random.choice(prediction[-1].argsort()[-3:])]
             gen_sent.append(gen_word_i)
 
-        return " ".join(gen_sent[::-1])
+        return " ".join(gen_sent[:-1][::-1])
 
     def generate_couplets(self, rhyming_pairs, n=10):
         ret = set()
