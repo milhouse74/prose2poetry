@@ -11,6 +11,9 @@ import random
 import multiprocessing
 import itertools
 from tabulate import tabulate
+from nltk.corpus import brown
+import nltk
+nltk.download('brown')
 
 
 def compute_stats(scores):
@@ -21,11 +24,11 @@ def compute_stats(scores):
     )
 
 
-def score_couplets(couplets, scorer):
-    scores = numpy.ndarray(shape=(len(couplets), 5), dtype=numpy.float64)
+def score_couplets(couplets):
+    scores = numpy.ndarray(shape=(len(couplets), 3), dtype=numpy.float64)
 
     for i, couplet in enumerate(couplets):
-        scores[i] = scorer.calculate_scores(couplet)
+        scores[i] = CoupletScorer.calculate_scores(couplet)
 
     return scores
 
@@ -76,11 +79,6 @@ def main():
     # select args.n_eval random samples from our various baselines
     couplets_1 = random.sample(couplet_baseline_1.couplets, args.n_eval)
     couplets_2 = random.sample(couplet_baseline_2.couplets, args.n_eval)
-
-    # use a random selection of gold standard gutenberg couplets to evaluate all poems
-    couplet_scorer = CoupletScorer(
-        couplet_baseline_1.couplets_flat_list(n_random_couplets=5000)
-    )
 
     # use random pairs of sentences from our prose corpus for "bad couplets"
     prose_corpus = ProseCorpus()
@@ -149,8 +147,7 @@ def main():
                     couplets_6[quarter : 2 * quarter],
                     couplets_6[2 * quarter : 3 * quarter],
                     couplets_6[3 * quarter :],
-                ],
-                itertools.repeat(couplet_scorer),
+                ]
             ),
         )
     )
@@ -204,7 +201,7 @@ def main():
             "std",
             ".95 quantile",
         ]
-        metrics = ["total", "rhyme", "stress", "semantic", "meteor"]
+        metrics = ["total", "rhyme", "stress"]
         table = []
         for j, metric_name in enumerate(metrics):
             table.append(

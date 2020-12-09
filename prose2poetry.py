@@ -57,11 +57,6 @@ def main():
 
     couplet_gold_standard = GutenbergCouplets()
 
-    # evaluate couplets against the gold standard of gutenberg couplets
-    couplet_scorer = CoupletScorer(
-        couplet_gold_standard.couplets_flat_list(n_random_couplets=5000)
-    )
-
     # get at least 5x top_n semantically similar words to increase the chances of finding good rhyming pairs among them
     semantic_sim_words = ft_model.get_top_n_semantic_similar(
         args.seed_words, n=5 * args.top_n
@@ -94,7 +89,7 @@ def main():
     couplets = generator.generate_couplets(all_results, n=1000)
     for couplet in couplets:
         print("Markov chain generated couplet:\n\t{0}".format(couplet))
-        print("\tscore: {0}".format(couplet_scorer.calculate_scores(couplet)[0]))
+        print("\tscore: {0}".format(CoupletScorer.calculate_scores(couplet)[0]))
 
     return 0
 

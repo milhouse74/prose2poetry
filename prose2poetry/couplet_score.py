@@ -2,22 +2,15 @@ from .rhyme_score import rhyme_score
 import itertools
 import pronouncing
 import difflib
-from nltk.translate.meteor_score import meteor_score
-from .vector_models import Doc2vecModel
 
 
 class CoupletScorer:
     ### combined score weights
     rhyme_weight = 0.5
-    stress_weight = 0.2
-    semantic_weight = 0.15
-    meteor_weight = 0.15
+    stress_weight = 0.5
 
-    def __init__(self, reference_corpus):
-        self.semantic_scorer = Doc2vecModel(reference_corpus)
-        self.reference_corpus = reference_corpus
-
-    def calculate_scores(self, poem_lines):
+    @staticmethod
+    def calculate_scores(poem_lines):
         ### keep only two-lines poem
         if len(poem_lines) != 2:
             raise ValueError("can only score 2-line poems/couplets")
@@ -50,36 +43,20 @@ class CoupletScorer:
             stress_strings.append(stress_string)
 
         ### rhyme score
-        rhyme_score_ = rhyme_score(last_words[0], last_words[1])
+        rhyme_score_ = rhyme_score(last_words[0], last_words[1], penalize_short_word=False)
 
         ### stress score
         stress_string_score = difflib.SequenceMatcher(
             None, stress_strings[0], stress_strings[1]
         ).ratio()
 
-        ### semantic score
-        semantic_score = self.semantic_scorer.similarity(poem_lines[0], poem_lines[1])
-
-        ### METEOR score
-        meteor_score_1 = meteor_score(self.reference_corpus, poem_lines[0])
-        meteor_score_2 = meteor_score(self.reference_corpus, poem_lines[1])
-
-        try:
-            meteor_score_combined = (meteor_score_1 + meteor_score_2) / 2.0
-        except Exception as e:
-            print("failed to get meteor score: {0}".format(str(e)))
-
         ### combined score
         ret = (
             CoupletScorer.rhyme_weight * rhyme_score_
             + CoupletScorer.stress_weight * stress_string_score
-            + CoupletScorer.semantic_weight * semantic_score
-            + CoupletScorer.meteor_weight * meteor_score_combined
         )
         return [
             ret,
             rhyme_score_,
             stress_string_score,
-            semantic_score,
-            meteor_score_combined,
         ]

@@ -8,9 +8,9 @@ import numpy
 
 def rhyme_score(word1, word2, penalize_short_word=True):
     # initilize weight of the different scores
-    weight_score_phone_matching = 0.15
-    weight_score_consecutive_phone = 0.7
-    weight_score_syllable_count = 0.15
+    weight_score_phone_matching = 0.33
+    weight_score_consecutive_phone = 0.34
+    weight_score_syllable_count = 0.33
 
     # penalizing variables
     penalizing_factor = 6
