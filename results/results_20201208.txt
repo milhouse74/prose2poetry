@@ -1,0 +1,365 @@
+Gutenberg, 1000 couplets
+----------------------------------------------
+
+| metric   |     mean |      std |   .95 quantile |
+|----------|----------|----------|----------------|
+| total    | 0.690854 | 0.115523 |       0.860243 |
+| rhyme    | 0.699621 | 0.176453 |       0.934    |
+| stress   | 0.682087 | 0.144791 |       0.889444 |
+
+top 5% couplets:
+('And let my gathered servants stand', 'And line with troops the river strand')
+('Whose souls, that were sprung from the earth in her morning', 'No longer regard or remember her warning')
+('Riding his eagle through the crowd', 'As the sun rides upon a cloud')
+('Be cold indifference, grief or pain', 'Mine to endure--the loss is gain')
+('and ruffled', 'and shuffled')
+('No more, no more, since thou art dead', "Shall we e'er bring coy brides to bed")
+("The trumpet's clangors pierce my ear", "A thousand widows' shrieks I hear")
+('Under the shade of the western wall', "There's a glimmer of roses fair and tall")
+('Existence would be very bleak and cold', 'After long years, when I was gray and old')
+('Might spread to the barren highways', 'And fill with Forget-me-nots countless neglected byways')
+('As the heavy rain comes sweeping', 'With a sound of weeping, weeping')
+('With silver sheens of crystal frost', 'Yet warm, nor life nor fragrance lost')
+('Stepped unto Marsil, with braggart boast', '"Unto Roncesvalles I lead my host')
+('But dropt the mask,--on wings of prayer', "O'er mists of earth and clouds of air")
+('August brings the sheaves of corn', 'Then the harvest home is borne')
+('Look round, if you please, and survey the wide ball', 'And chance, you will find, has direction of all')
+('Be fild with praises of divinest wits', 'That her eternize with their heavenlie writs')
+("I might have promis'd to myself those harms", 'Mad as I was, when I, with mortal arms')
+("I knew the cold, fixed gaze of Vivian's eyes", 'Saw the slow colour to my forehead rise')
+('Revealed their sullen leagues and bare', 'And sad forms flitting here and there')
+("May hing their head in woefu' bevel", 'While by their nose the tears will revel')
+('Your hens and your cocks', 'Your cows and your ox')
+('Driven from his ancestral streams', 'By the might of evil dreams')
+('From dainty rosebud lips in pout', 'Must kiss the perfect flowér out')
+("Upon the water, 'mid the skies", 'Reflected eyes')
+('Frozen earth to frozen breast', 'Lay our slain one down to rest')
+('The swift, fierce greyhounds coursing on the plains', "The flying hare, distress'd 'twixt fear and pains")
+('Then doth thy sweet and quiet eye', 'Look through its fringes to the sky')
+('The creatures: cloud-fleece young that leap and veer', 'Mad-mane and gentle ear')
+('He sang of God, the mighty source', 'Of all things, the stupendous force')
+("Between the fence's zigzag rails", 'The stranger sees the road that trails')
+('Compete for manly strength and portly air', 'Or wield a scythe with any reaper there')
+("And through the roses, o'er the park", 'Star-like the fire-flies filled the dark')
+('The deer, half seen, are to the covert wending', 'Resume thy wizard elm! the fountain lending')
+('This is the Cock that crowed in the morn', 'That waked the Priest all shaven and shorn')
+('Count that day lost whose low descending sun', 'Views from thy hand no worthy action done')
+('But no longer it wagged with an impudent air', "No longer he perched on the Cardinal's chair")
+("Tho' fortune use you hard an' sharp", 'Come, kittle up your moorland harp')
+('And when you sit in your palace halls', 'And the feast of St. Michael of Peril falls')
+('Lament no more your loss of beauty', 'But give your thoughts to do that duty')
+('If it in darknesse be enshrined ever', 'That it of loving eyes be vewed never')
+('That man may last, but never lives', 'Who much receives but nothing gives')
+('S was the Sailor who got very tight', 'T was the Tempest which came on one night')
+('Careless he was of much the world counts gain', 'Careless of self, too simple to be vain')
+('Methinks too distant from the fleet we lie', "E'en now a vision stood before my eye")
+("Thank God for England's care", "Thank God for Britain's heir")
+('To be the thing we seem', 'To do the thing we deem')
+('A moment on the topmost grade while open fire doors glare', 'She pauses like a living thing to breathe the mountain air')
+('How I do strive for heights? but lacking wings', 'I cannot grasp at once those better things')
+('Alas! if kissing be of plagues the worst', "We'll wish in hell we had been last and first")
+
+PoetryFoundation, 1000 couplets
+----------------------------------------------
+
+| metric   |     mean |      std |   .95 quantile |
+|----------|----------|----------|----------------|
+| total    | 0.689048 | 0.118413 |       0.852987 |
+| rhyme    | 0.696258 | 0.188128 |       0.934    |
+| stress   | 0.681838 | 0.14058  |       0.888889 |
+
+top 5% couplets:
+('Poets hate to have directives', 'They’re on their own, not on collectives')
+("To upstart Wealth's averted eye", 'To supple Office, low and high')
+('And hence one master passion in the breast', "Like Aaron's serpent, swallows up the rest")
+('Fierce for the liberties of wit, and bold', 'We still defied the Romans, as of old')
+('Mauve heather crowds the window-grill. The light', 'lingers a little later, with a slight')
+('the soft grass is growing', 'the sweet breeze is blowing')
+('Brother with queer brother', 'Signalling each other')
+('Of growing to be more than that you are', 'Doing the things you know do better far')
+("than victory over one who'd tried", 'to punish me before he died')
+('No, there is not a dawn in eastern skies', 'To rift the fiery night that’s in your eyes')
+('We were very tired, we were very merry', 'We had gone back and forth all night on the ferry')
+('I lived and grew, I worked and hoped', 'I planned and wandered, gripped and coped')
+('But oh, it makes my Mother squirm', 'Because she thinks I ate that worm')
+('Let not the dark thee cumber', 'What though the moon does slumber')
+('And Rome never heeds when we bawl', 'Her sentries pass on—that is all')
+('Like a hell-broth boil and bubble', 'Double, double toil and trouble')
+('Time is the school in which we learn', 'Time is the fire in which we burn')
+("And day by day some current's thwarting force", "Sets me more distant from a prosp'rous course")
+('Fair as a garden of the Lord', 'To the eyes of the famished rebel horde')
+("let's birdland let's stroll", "let's rock let's roll")
+('Freshen thy flowers as in former years', 'With dew, or listen with enchanted ears')
+('Drink the pale drug of silence, and so beat', "Sleep's heavy measure, they from head to feet")
+("She comb'd its bright hair, and she tended it well", 'When down swung the sound of a far-off bell')
+('Speeding on through the dense, dark night', 'Guided alone by the soul’s white light')
+('real quick and shy, but still like he was trying', 'to reach me. I drove on. Then I bust out crying')
+('oh               yes              no', 'melt           rain             snow')
+('Weary lie we down and rest', 'And fan each other’s panting breast')
+('The walls are hung with velvet that is black and soft as sin', 'And little dwarfs creep out of it and little dwarfs creep in')
+('quaint equations           Romans never', 'dreamt of. In form completely clever')
+('(Loose his beard, and hoary hair', "Stream'd, like a meteor, to the troubled air")
+('Not a better man was found', 'By the Crier on his round')
+('Leering at each other', 'Brother with queer brother')
+('Creator Spirit, by whose aid', "The world's foundations first were laid")
+('between heaven and here', 'And I shudder when I hear')
+('That certain baits in certain eyes', 'Caught many an unsuspecting prize')
+('Before the glimmer of his sunken eyes', 'What question could I answer with my lies')
+('My skin will crawl with bugs', 'if I don’t get my drugs')
+('Much mirth and no madness', 'All good and no badness')
+('The white clown caught it. From St. Rémy’s tower', 'The deep, slow bell tolled out the hour')
+('Of your fruits though much and many', 'Give me back my silver penny')
+('(Her guide now lost) no more attempts to rise', 'But in low numbers short excursions tries')
+('A bone shop, soaked in pearl, a dumping', 'Ground for rarities, the sea-maws pumping')
+('I heard my kid brother', 'cry out to my mother')
+('I am the thought of the throbbing mills', 'I am the soul of the soul-toil kills')
+('Oh! I dream of Jeanie with the light brown hair', 'Floating, like a vapor, on the soft summer air')
+('We walked on leisurely until a bend', 'Showed him once more, now working toward the end')
+("of a dog's throat. How the pungent, meaty stream of it", 'cracks into something like words—but not. I just sit')
+("A banner's frittering tassel", 'or deflating bouncy castle')
+('And the man die against the cold last wall', 'Of the lonely world—and neither is that all')
+('Spangled gowns', 'Friendly clowns')
+
+Prose, 1000 couplets
+----------------------------------------------
+
+| metric   |     mean |      std |   .95 quantile |
+|----------|----------|----------|----------------|
+| total    | 0.335004 | 0.130254 |       0.555718 |
+| rhyme    | 0.190808 | 0.178143 |       0.462    |
+| stress   | 0.479201 | 0.19019  |       0.762045 |
+
+top 5% couplets:
+('i had imagined him , i confess , a degree or two nearer gentility', '" to be sure ," said harriet , in a mortified voice , " he is not so genteel as real gentlemen')
+("he thought principally of mrs . churchill ' s illness , and wanted to know how she was treated ; and as for the ball , it was shocking to have dear emma disappointed ; but they would all be safer at home", 'emma was ready for her visitor some time before he appeared ; but if this reflected at all upon his impatience , his sorrowful look and total want of spirits when he did come might redeem him')
+('" i thought you meant to go with me', 'they would be very much pleased')
+("you clever creature , that ' s very true", 'what a thinking brain you have')
+('the mistake had been slight', 'the carriage was sent for them now')
+('he looked at her , as if wanting to read her thoughts', 'she hardly knew what to say')
+('how is she to - day', 'tell me how miss fairfax is')
+('" mrs . dixon', 'very true indeed')
+('" aye , we men are sad fellows', 'you must take care of yourself , mrs')
+('i shall write to mrs . partridge in a day or two , and shall give her a strict charge to be on the look - out for any thing eligible', '" thank you , but i would rather you did not mention the subject to her ; till the time draws nearer , i do not wish to be giving any body trouble')
+('harriet bore the intelligence very well -- blaming nobody -- and in every thing testifying such an ingenuousness of disposition and lowly opinion of herself , as must appear with particular advantage at that moment to her friend', "emma was in the humour to value simplicity and modesty to the utmost ; and all that was amiable , all that ought to be attaching , seemed on harriet ' s side , not her own")
+("it is like a woman ' s writing", 'this was not submitted to by either lady')
+('the strength , resolution , and presence of mind of the mr . knightleys , commanded his fullest dependence', 'while either of them protected him and his , hartfield was safe .-- but mr . john knightley must be in london again by the end of the first week in november')
+('she was proved to have been universally mistaken ; and she had not quite done nothing -- for she had done mischief', 'she had brought evil on harriet , on herself , and she too much feared , on mr')
+('" to be sure', 'oh yes')
+('their luxury and ease', 'another view of man , my second brings , behold him there , the monarch of the seas')
+('i must have given you up', '" dear me !-- how should i ever have borne it')
+('soup too', 'bless me')
+('this does not apply , however , to miss bates ; she is only too good natured and too silly to suit me ; but , in general , she is very much to the taste of every body , though single and though poor', 'poverty certainly has not contracted her mind : i really believe , if she had only a shilling in the world , she would be very likely to give away sixpence of it ; and nobody is afraid of her : that is a great charm')
+('she was very fond of singing', 'he could sing a little himself')
+('" no , certainly not ; i shall go home in the cool of the evening', '" but you may come again in the cool of to - morrow morning')
+('" what can it be , miss woodhouse ?-- what can it be', 'i have not an idea -- i cannot guess it in the least')
+('" that is what you have in your head , i know -- and what you would certainly say if my father were not by', '" i believe it is very true , my dear , indeed ," said mr . woodhouse , with a sigh')
+('such things in general cannot be too short', 'harriet was too intent on the lines to hear')
+('" i do not see much sign of it', 'she is playing _robin_ _adair_ at this moment -- _his_ favourite')
+('i am sure he was particularly silent when mrs . cole told us of it at dinner', '" you take up an idea , mrs . weston , and run away with it ; as you have many a time reproached me with doing')
+('of mr', 'elton')
+('" i hope not _that_ .-- it is not likely', 'no , mr . knightley , do not foretell vexation from that quarter')
+('( with a little sigh of sentiment', 'a charming place , undoubtedly')
+('harriet smith refuse robert martin', 'madness , if it is so ; but i hope you are mistaken')
+('" no , my dear ," said her father instantly ; " _that_ i am sure you are not', 'there is nobody half so attentive and civil as you are')
+('let me entreat you to run no risks', 'why does not perry see her')
+('though her nephew had had no particular reason to hasten back on her account , she had not lived above six - and - thirty hours after his return', 'a sudden seizure of a different nature from any thing foreboded by her general state , had carried her off after a short struggle')
+('but is not this a sudden scheme', '" yes -- rather -- i have been thinking of it some little time')
+('i perfectly remember it .-- stop ; mr . knightley was standing just here , was not he', 'i have an idea he was standing just here')
+('what would frank churchill say to her , if he were here', 'how angry and how diverted he would be')
+("the morning of the interesting day arrived , and mrs . weston ' s faithful pupil did not forget either at ten , or eleven , or twelve o ' clock , that she was to think of her at four", '" my dear , dear anxious friend ,"-- said she , in mental soliloquy , while walking downstairs from her own room , " always overcareful for every body \' s comfort but your own ; i see you now in all your little fidgets , going again and again into his room , to be sure that all is right')
+('his aunt could not bear to have him leave her', "such was his own account at randall ' s")
+('emma was sure he had not forgiven her ; he looked unlike himself', 'time , however , she thought , would tell him that they ought to be friends again')
+('" i mentioned no _names_ , you will observe .-- oh', 'no ; cautious as a minister of state')
+('she has not the open temper which a man would wish for in a wife', 'emma could not but rejoice to hear that she had a fault')
+('" upon my word it is , miss bates .-- he really is engaged from morning to night .-- there is no end of people \' s coming to him , on some pretence or other .-- the magistrates , and overseers , and churchwardens , are always wanting his opinion', "they seem not able to do any thing without him .--` upon my word , mr . e .,' i often say , ` rather you than i .-- i do not know what would become of my crayons and my instrument , if i had half so many applicants")
+('" it is not very likely , my dear , that bathing should have been of use to her -- and if i had known you were wanting an embrocation , i would have spoken to', '" you seem to me to have forgotten mrs . and miss bates ," said emma , " i have not heard one inquiry after them')
+('yes "-- he replied ; " i was just going to mention it', 'a very successful visit :-- i saw all the three ladies ; and felt very much obliged to you for your preparatory hint')
+('emma was in no danger of forgetting', 'it was a commission to touch every favourite feeling')
+('is not it so', '" oh')
+('" we must ask mr . and mrs . weston to dine with us , while isabella is here', '" yes , my dear , if there is time .-- but --( in a very depressed tone )-- she is coming for only one week')
+('[ to mrs', 'weston')
+('just as your drawings always are , my dear', 'i do not know any body who draws so well as you do')
+("jane had not been gone a quarter of an hour , and they had only accomplished some views of st . mark ' s place , venice , when frank churchill entered the room", 'emma had not been thinking of him , she had forgotten to think of him -- but she was very glad to see him')
+
+Naive generator, 1000 couplets
+----------------------------------------------
+
+| metric   |     mean |      std |   .95 quantile |
+|----------|----------|----------|----------------|
+| total    | 0.56752  | 0.147838 |       0.788381 |
+| rhyme    | 0.658671 | 0.182762 |       0.934    |
+| stress   | 0.47637  | 0.210701 |       0.8      |
+
+top 5% couplets:
+['respect would be added to affection', 'this was the conclusion of the first series of reflection']
+['respect would be added to affection', '" what two letters !-- express perfection']
+['respect would be added to affection', 'she had no objection']
+['come , he knows himself there', 'miss smith , pray take care']
+['come , he knows himself there', 'i hope you find a chair']
+['" so they will , my dear', 'you have made yourself too clear']
+['i could not walk half so far', 'but those two lines are']
+['it is a retired place', "keep your raptures for harriet ' s face"]
+['will you', 'soup too']
+['will you', '" pray do']
+['remember it', "humph -- harriet ' s ready wit"]
+['weston , tell me at once .-- something has happened in brunswick square', 'i never had much opinion of the sea air']
+['weston , tell me at once .-- something has happened in brunswick square', 'but then there is not so clever a man any where']
+['she would catch a dreadful cold', 'how shall you employ yourself when you grow old']
+['william larkins mentioned it here', 'she was not obliged to hear']
+['i wanted them to put off the wedding', 'it then occurred to her to employ him in reading']
+['" that is what you have in your head , i know -- and what you would certainly say if my father were not by', 'if you knew how much i love every thing that is decided and open !-- good - bye , good - bye']
+['no', 'oh']
+['i meant only myself', 'but take care of yourself']
+['it will be giving him so much pleasure', 'it seemed to him a very ill - judged measure']
+['it will be giving him so much pleasure', 'i shall certainly be at leisure']
+['emma thought with pleasure of some change of subject', 'it would not be a bad thing for her to be very much in love with a proper object']
+['what are you proud of', 'i am quite enough in love']
+['this is just what perry said', 'do not put it into his head']
+['i like them all', 'they were entering the hall']
+['" i rather doubt that', 'they were a couple worth looking at']
+['he could sing a little himself', 'she desired nothing better herself']
+['what is passable in youth is detestable in later age', '" yes , papa , it is written out in our second page']
+['soup too', '" pray do']
+['always my kindest friend on every occasion', 'harriet could not long resist so delightful a persuasion']
+['" will you read the letter', 'all the better']
+['" indeed i will', 'poor jane is ill']
+['it would be an interesting , and certainly a very kind undertaking ; highly becoming her own situation in life , her leisure , and powers', 'i think , miss woodhouse , you and i must establish a musical club , and have regular weekly meetings at your house , or ours']
+['" no -- he should not eat', 'so very odd we should happen to meet']
+['a _small_ half - glass , put into a tumbler of water', '" i leave an excellent substitute in my daughter']
+['we seemed to understand each other', 'mr . john knightley proved more talkative than his brother']
+['knightley must never marry', 'we are so very airy']
+['frank churchill caught the name', 'does mrs . churchill do the same']
+['" where is the young man', 'no -- a very bad plan']
+['very odd', '" good god']
+['william larkins let me keep a larger quantity than usual this year', 'a little quickness of voice there is which rather hurts the ear']
+['dear me', 'said she']
+['" but there may be pretty good guessing', 'it is such a blessing']
+['what has he to do with books', 'i want to have your opinion of her looks']
+["goddard ' s", 'you will never guess']
+['do not be overpowered by such a little tribute of admiration', 'she is not a sensible girl , nor a girl of any information']
+['regular features , open countenance , with a complexion', 'this was the conclusion of the first series of reflection']
+['approve my charade and my intentions in the same glance', 'might not the evening end in a dance']
+['the difference which randalls , randalls alone makes in your goings - on , is very great', 'you would not earn a very good livelihood as a working silversmith at this rate']
+['" i am very sorry to hear , miss fairfax , of your being out this morning in the rain', '" but every thing of that kind ," said emma , " will soon be in so regular a train']
+
+Markov generator, 1000 couplets
+----------------------------------------------
+
+| metric   |     mean |      std |   .95 quantile |
+|----------|----------|----------|----------------|
+| total    | 0.576462 | 0.12664  |       0.769282 |
+| rhyme    | 0.678238 | 0.165115 |       0.899356 |
+| stress   | 0.474686 | 0.187528 |       0.771567 |
+
+top 5% couplets:
+('Could the event of the comfort of her assistance in the answer to herself , she has refused', 'She looked back as well as any reason for saying so much to wonder at what time you were amused')
+('Nothing was wanting _him_ to dance ; and after paying', 'Mr . Knightley , in a tremor , and sleeping and playing')
+('Mr . Knightley would be disappointed ; and from the very event to engage those who were ; but the part of Emma , in fancying , in future , the hopes , and , I am quite in the shade were found', 'His extreme attention to her father , that two or three more of his opinion completely for travelling round')
+('It was no longer an alarm for his sake', 'Now do not think I shall not attempt to fix her wedding - cake')
+('well , and had otherwise a fancy for the writer , and that he could , was never indifferent', 'To her voluntary communications Emma could not believe it to find Harriet different')
+('In all probability', 'Every possibility')
+('Here is my superior in all the eating', 'It is what we all feel the first subject on meeting')
+('So Emma thought very pretty gallant charade remains , fit for any body superior , she could , to combine liberal acquirements with elegant morality , upon the rights', 'It was as right as this speech , from the very next day ; she could not perceive .-- He was gone long enough for shewing people again how delightfully she writes')
+('And ever since those two decisive dances', 'She is known only as the discussion of hopes and chances')
+('And that is , I have a nice', 'They came from her niece')
+('This is a very white', 'Mr . Knightley , forgetting that he quite')
+('I could never see a better', 'I hope , a highly prized letter')
+('He sat a little start', 'Emma must sink him in the highest part')
+('Emma knew that he knew that eating and drinking', 'Emma was now the Campbells , he made some progress without any danger of thinking')
+('But on seeing Mrs . Weston in keeping', 'He might even have seen into her feelings , he was sleeping')
+('-- She thought he saw another collection', 'She gave him all perfection')
+('The woman was better for the writer , and afterwards , as her mind which gives', 'Serious she was a very sudden trial of our lives')
+('She was quite as well as you had _named_ Mr . Knightley must not class', 'If meant to encourage me in this case , and let it pass')
+('I thought it the picture will not despair , however , was the glory of Miss Smith as her brother and sister that , if cards', 'Mrs . Elton was speaking of her stores ; and some reluctance the widower - father may be ; and the three , were not twenty yards')
+('You may guess how readily he came to Highbury , and with laughing eyes , light hair , regular features', 'You like Mr . Knightley suspected in Frank Churchill , of all creatures')
+('He thought', 'He ought')
+('If they are quite as unmanageable as great', 'The next remove was to Mr . Woodhouse considered eight')
+('We have apple - dumplings , however , but I assure you I began this letter , at least , but was really obliged to read her thoughts .-- She said', 'Emma had done her more and more justified and endeared to her telling us , for it -- but just enough to be obliged to go out with her own head')
+('And I hate Italian singing', 'It must have penetrated a part in bringing')
+('She had no power of performance ; and the face not unlike', 'It was hot ; and having all sat down to supper , was never indifferent to the pianoforte so much alike')
+('He was more than the principals were prepared', 'Dixon is very sad -- but , compared')
+('Or , perhaps , more reserved', 'Now there is nothing grandmama loves better than she deserved')
+('He reads the Agricultural Reports , and seemed quite forgotten in the highest promise of felicity in itself a charming collection', 'South End , a trick , nothing could exceed his alertness and attention in conducting them into the drawing - room after dinner , however , must be a painful reflection')
+('It made her feel that he should suspect', 'As to her , one might expect')
+('I give up -- but such brilliant days had passed without distinction , and gave him all perfection', 'She had been alone with Harriet leaning on his account , he would be a bad connexion')
+('He gave her assistance ; and by this connexion', 'They added to affection')
+('-- And from her mania for Mr . Woodhouse for some time , walking briskly with long', 'Mr . Weston , with a degree that must have had no concern in the wrong')
+('Its character as a compliment to themselves .-- Emma knew that eating and drinking', 'A _Mrs . _ _Elton_ would be pleasure in her native air , her father and mother to come and dine with them , and might be preserved from sinking')
+('Harriet listened , and she was longing to tell you what is to every source', 'Such another small basin of nice smooth gruel , with all the force')
+('This , on any kindness of his widow sinking', 'After a little deaf , you walk as if , like his , and must be thinking')
+('The delightful assurance of accent', 'A very proper ; the late event')
+('You know we agreed never', 'And he is to be acquainted whenever')
+('They sang together once or twice , it is so with some hesitation', 'Mr . Knightley , whom Emma knew that he had seen ; so much warm admiration')
+('In he walked , but with reserved', 'In short , I observed')
+('She had no fear', 'Miss Woodhouse is near')
+('Mrs . Hodges _would_ be cross', 'He is so delighted with its loss')
+('I am afraid you will believe the declaration', 'It was no denying that those brothers had penetration')
+('It seemed as if in a glow both of complexion and spirits for going ; dear Mrs . Bates , deceived', 'This made a great scream , and light column of smoke ascending .-- She received')
+('But you were in an unwelcome', 'yes , gloves and every thing was welcome')
+('They might advance rapidly if they had a wet ride', 'She will be giving away his pride')
+('said she , at the idlest haunts in the general amount of the school', 'As to any thing was to get sober and cool')
+('If I had actually fallen , and of those , who threw her off after a little shocked at the sound before , and call for her , that with all the honest pride', 'But Mr . Woodhouse hoped to make her comfortable at once , all the grandeur of the Churchills -- or my tour to read regularly through -- and the bride')
+('Harriet did think him all perfection', 'The other circumstance of your affection')
+('Emma could not doubt , there had been saying', 'Emma thought , would be of his being put off , and paying')
+('Her eyes , light hair', 'Oh yes , I dare')
+
+LSTM generator, 1000 couplets
+----------------------------------------------
+
+| metric   |     mean |      std |   .95 quantile |
+|----------|----------|----------|----------------|
+| total    | 0.591084 | 0.125339 |       0.780997 |
+| rhyme    | 0.680225 | 0.165595 |       0.906177 |
+| stress   | 0.501942 | 0.194924 |       0.8      |
+
+top 5% couplets:
+('not see see as she as she have could error', 'of or by a child seemed a that of .-- and of much little self - appeared !-- that not that had an own .--" terror')
+(', that he hesitated , it can gratified', ', if must with the on mortified')
+('at and so so so extent', 'blunder be for the event')
+(', he had now required', 'would be who retired')
+('was required', 'it first admired')
+(', that that he child a reproach', 'but his daughter approach')
+('it could as that have been to see what did her would have have little for a consent raise', ', for another much by its for for of - child seemed be ought -- would that she must have a it .-- can praise')
+('would be her of my be agitated', 'soon , he burst well hesitated')
+('was the mind compose', 'they within expose')
+('on its in as it left for how , again to the induced to consent ?-- he was have not this morning affections', '-- what objection was on side or an a man -- , as had always liked -- but , connexions')
+('at as , appeared , the mind of every day , he could not perfectly well she could should affections', 'much well day and and was called from a .-- a month in his marriage of , for was end of - child , as it can reflections')
+('and happy in was all her father of her inclination', 'and really and as she , very promising explanation')
+('not see as -- you , her set see you see quite her suspect', 'and very sudden of its all be her must sink expect')
+('and in the been understanding neither', '-- and that he had been a , either')
+('been and see it and but the had had alarm her all but who had have been deceived', 'by the by the sense of of turn in - child appeared not this her received')
+('that to less for at s head , as you can be to consent ?-- he could have had wise', 'them and received its been for so creature for the can had eyes')
+('almost was place', '" her lace')
+(', he hesitated -- " " ?-- addressing', 'as she another distressing')
+(', but missed was answered of this world , would that had passion', 'on mind evening at .-- to to be them had which compassion')
+('by by in change sense which ought simplicity', 'at ought felicity')
+('could as she have had to affections', 'to it not -- it too " she " recollections')
+('he indifference', "' difference")
+('was such laughing .-- , , .-- us reserved', 'world -- how " ever catch observed')
+('been by in in in is is be preparation', '!-- it it would be , said child penetration')
+('is " - recollection', 'neighbourhood direction')
+('" such , have .-- , the last information', ', - child had must be the his invitation')
+('fall on him a or was a , books', '!-- would not be them and fears looks')
+('and the were were while , other great', 'in a little small of but man was all to in , necessarily rate')
+(', a more sort of its -- with , and as she confusion motion', 'now too by such soon .-- had not find -- for , almost under notion')
+('must be neighbourhood direction', '" you see see but , connexion')
+('for only only and , she could could last', ', , event at before feelings were again -- as he stood fast')
+('that he stood before , not be naturally into home end of for , were comparison of the , and men , not now now , it been effect', 'that he could not see a the or a cheerful consent even of affect')
+('that pleased as she had been and ?-- he was prevent long , the very man suffer ought', 'such you !-- had never been her " " " " no taught')
+('at s other complexion', 'not if direction')
+('not be my approbation', 'would be a led his explanation')
+('and with him , and it was waiting with , to herself , and , had had see be day at she mile', 'reason for now .-- -- to with away with and while she and as she could yet style')
+("of the more man from all ' s s child ought correct", 'that .-- was quite with , at her as that she had ever direct')
+('failed thrown', '!-- you are grown')
+('were be suspecting', 'but him the whose expecting')
+('it " my my agitated', 'not know him animated')
+('and angel of a to return , and , as though see but in the she latter', '-- but and .-- voice as it can superior flatter')
+('been what ought to be be .-- .-- less of less from the paying', '," kindly , and see while she could well but than the placed from the gratefully playing')
+('never', '.--" ever')
+('man to with again by , as it perfectly well it could would unwelcome', 'and well , for for so steady at think it was such friend as .-- is passing almost welcome')
+('from , and from her to sense any - - - day propose', 'for - ceremony .-- had a result in ?-- fact seemed , that -- as a dared .-- and and it can ever oppose')
+('" she a collection', 'next perfection')
+('them the , whose he declaration', 'all be , the child penetration')
+('" this next is better smile', 'such " see be day at she mile')
+(', it can stood rule', 'to be be her a cool')
+('had her neighbourhood drinking', ', though her sinking')

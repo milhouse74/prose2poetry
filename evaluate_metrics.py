@@ -21,11 +21,11 @@ def compute_stats(scores):
     )
 
 
-def score_couplets(couplets, scorer):
-    scores = numpy.ndarray(shape=(len(couplets), 5), dtype=numpy.float64)
+def score_couplets(couplets):
+    scores = numpy.ndarray(shape=(len(couplets), 3), dtype=numpy.float64)
 
     for i, couplet in enumerate(couplets):
-        scores[i] = scorer.calculate_scores(couplet)
+        scores[i] = CoupletScorer.calculate_scores(couplet)
 
     return scores
 
@@ -77,11 +77,6 @@ def main():
     couplets_1 = random.sample(couplet_baseline_1.couplets, args.n_eval)
     couplets_2 = random.sample(couplet_baseline_2.couplets, args.n_eval)
 
-    # use a random selection of gold standard gutenberg couplets to evaluate all poems
-    couplet_scorer = CoupletScorer(
-        couplet_baseline_1.couplets_flat_list(n_random_couplets=5000)
-    )
-
     # use random pairs of sentences from our prose corpus for "bad couplets"
     prose_corpus = ProseCorpus()
     couplets_3 = random.sample(list(pairs(prose_corpus.joined_sents)), args.n_eval)
@@ -121,37 +116,34 @@ def main():
     quarter = int(args.n_eval / 4)
 
     scores = list(
-        pool.starmap(
+        pool.map(
             score_couplets,
-            zip(
-                [
-                    couplets_1[:quarter],
-                    couplets_1[quarter : 2 * quarter],
-                    couplets_1[2 * quarter : 3 * quarter],
-                    couplets_1[3 * quarter :],
-                    couplets_2[:quarter],
-                    couplets_2[quarter : 2 * quarter],
-                    couplets_2[2 * quarter : 3 * quarter],
-                    couplets_2[3 * quarter :],
-                    couplets_3[:quarter],
-                    couplets_3[quarter : 2 * quarter],
-                    couplets_3[2 * quarter : 3 * quarter],
-                    couplets_3[3 * quarter :],
-                    couplets_4[:quarter],
-                    couplets_4[quarter : 2 * quarter],
-                    couplets_4[2 * quarter : 3 * quarter],
-                    couplets_4[3 * quarter :],
-                    couplets_5[:quarter],
-                    couplets_5[quarter : 2 * quarter],
-                    couplets_5[2 * quarter : 3 * quarter],
-                    couplets_5[3 * quarter :],
-                    couplets_6[:quarter],
-                    couplets_6[quarter : 2 * quarter],
-                    couplets_6[2 * quarter : 3 * quarter],
-                    couplets_6[3 * quarter :],
-                ],
-                itertools.repeat(couplet_scorer),
-            ),
+            [
+                couplets_1[:quarter],
+                couplets_1[quarter : 2 * quarter],
+                couplets_1[2 * quarter : 3 * quarter],
+                couplets_1[3 * quarter :],
+                couplets_2[:quarter],
+                couplets_2[quarter : 2 * quarter],
+                couplets_2[2 * quarter : 3 * quarter],
+                couplets_2[3 * quarter :],
+                couplets_3[:quarter],
+                couplets_3[quarter : 2 * quarter],
+                couplets_3[2 * quarter : 3 * quarter],
+                couplets_3[3 * quarter :],
+                couplets_4[:quarter],
+                couplets_4[quarter : 2 * quarter],
+                couplets_4[2 * quarter : 3 * quarter],
+                couplets_4[3 * quarter :],
+                couplets_5[:quarter],
+                couplets_5[quarter : 2 * quarter],
+                couplets_5[2 * quarter : 3 * quarter],
+                couplets_5[3 * quarter :],
+                couplets_6[:quarter],
+                couplets_6[quarter : 2 * quarter],
+                couplets_6[2 * quarter : 3 * quarter],
+                couplets_6[3 * quarter :],
+            ],
         )
     )
 
@@ -204,7 +196,7 @@ def main():
             "std",
             ".95 quantile",
         ]
-        metrics = ["total", "rhyme", "stress", "semantic", "meteor"]
+        metrics = ["total", "rhyme", "stress"]
         table = []
         for j, metric_name in enumerate(metrics):
             table.append(
