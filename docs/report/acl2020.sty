@@ -101,7 +101,7 @@
 \ProcessOptions\relax
 \ifacl@hyperref
   \RequirePackage{hyperref}
-  \usepackage{xcolor}		% make links dark blue
+  \usepackage[dvipsnames]{xcolor}		% make links dark blue
   \definecolor{darkblue}{rgb}{0, 0, 0.5}
   \hypersetup{colorlinks=true,citecolor=darkblue, linkcolor=darkblue, urlcolor=darkblue}
 \else
@@ -110,7 +110,7 @@
   % This is necessary because \href command is used in the acl_natbib.bst file.
   \def\href#1#2{{#2}}
   % We still need to load xcolor in this case because the lighter line numbers require it. (SC/KG/WL) 
-  \usepackage{xcolor}
+  \usepackage[dvipsnames]{xcolor}
 \fi
 
 \typeout{Conference Style for ACL 2019}

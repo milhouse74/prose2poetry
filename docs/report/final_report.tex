@@ -191,13 +191,29 @@ The word pair generation step needs to generate pairs of words that rhyme and ar
 	\item \textit{Word-pair scoring}: Given a list of all the possible word pairs, each pair can be scored with their respective semantic distance to the theme. The score is multiplied by 1 if the words rhyme according to pronouncingpy, and 0 if they don't. The top-scoring pairs in the final list are used as inputs to the sentence generation.
 \end{tight_enumerate}
 
-\textcolor{red}{
 \subsection{Sentence generation}
 \label{sec:languagegen}
-The next step is to feed high-scoring rhyming pairs of words to a language generator model, by setting each rhyming word as the last word in 2 sentences. The generator model will use the same prose corpus as its only input. It should then generate two sentences that have a rhyming last word, which is in essence a very basic rhyming couplet.
-LSTM, Markov, etc.
-\textbf{how about a very naive model that tries to find existing sentences that end with rhyming word pairs and just join them}
-Since we pick rhyming \textit{last word} pairs, we do our generation back-to-front. Specific challenges?
+
+\textcolor{Orchid}{
+	(preamble) in this step we will be generating 2 sentences backwards from 2 rhyming word pairs
+}
+
+\textcolor{Dandelion}{
+\subsubsection{LSTM model}
+\label{sec:lstm}
+LSTM, backwards, loss function, overfitting to 1 novel (not enough data), loss function to reflect good grammar/sentence formation, etc.
+}
+
+\textcolor{Orchid}{
+\subsubsection{Markov chain model}
+\label{sec:markov}
+Markov chain, external library, backwards
+}
+
+\textcolor{Dandelion}{
+\subsubsection{Sentence semantic relatedness}
+\label{sec:doc2vec}
+doc2vec shows that semantically related rhyming word pairs makes 2 sentence with a better doc2vec score
 }
 
 %%%%%%%%%%%%%%
@@ -383,10 +399,21 @@ From each evaluated dataset, two couplets which scored better than the .95 quant
 %%%%%%%%%%%%%%
 % DISC & CONC		%
 %%%%%%%%%%%%%%
-\textcolor{green}{
 \section{Discussion and conclusion}
 \label{sec:discconc}
-fmilot: I can help on this one once the results are putted there.
+
+\textcolor{green}{
+Results interpretation here. "Our poems scored well, stress score showed real poems have good meter, etc."
+}
+
+\textcolor{Orchid}{
+\subsection{Sevag discussion/conclusion ideas}
+sevag ideas
+}
+
+\textcolor{Dandelion}{
+\subsection{Francois discussion/conclusion ideas}
+francois ideas
 }
 
 \subsection{Multiple pronunciations and sense disambiguation}
@@ -408,6 +435,12 @@ Consider two examples, using WordNet \cite{wordnet} as a lexical resource via NL
 \end{tight_enumerate}
 
 There is no readily available mapping between CMUdict pronunciation and WordNet senses. This can only be resolved with a lexical resource that provides combined sense and pronunciation disambiguation -- Wiktionary \cite{wiktionary} is one such option, but scraping it was considered beyond the scope of this paper. The final approach chosen was to ignore ambiguity and return the best rhyme score across all possible pronunciation permutations.
+
+\textcolor{Orchid}{
+\subsection{Couplet content evaluation}
+\label{sec:nlg}
+difficulty with NLG, METEOR, BERT next sentence prediction, grammatical content
+}
 
 %%%%%%%%%%%%%%
 % STAT OF CONT		%
