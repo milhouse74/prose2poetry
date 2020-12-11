@@ -11,9 +11,6 @@ import random
 import multiprocessing
 import itertools
 from tabulate import tabulate
-from nltk.corpus import brown
-import nltk
-nltk.download('brown')
 
 
 def compute_stats(scores):
