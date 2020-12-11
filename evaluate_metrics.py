@@ -116,7 +116,7 @@ def main():
     quarter = int(args.n_eval / 4)
 
     scores = list(
-        pool.starmap(
+        pool.map(
             score_couplets,
             [
                 couplets_1[:quarter],
