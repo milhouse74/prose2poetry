@@ -47,7 +47,7 @@ def _train_and_save_model_lstm_1(prose_corpus, ft_model, vocab, model_path, memo
 
     # Create model
     model = Sequential()
-    model.add(LSTM(128, input_shape=(dataX.shape[1], dataX.shape[2])))
+    model.add(LSTM(64, input_shape=(dataX.shape[1], dataX.shape[2])))
     model.add(Dense(dataY.shape[1], activation="softmax"))
     model.compile(loss="categorical_crossentropy", optimizer="adam")
 
@@ -56,11 +56,14 @@ def _train_and_save_model_lstm_1(prose_corpus, ft_model, vocab, model_path, memo
     history = model.fit(dataX, dataY, epochs=200, batch_size=128, validation_split=0.20)
     loss_train = history.history["loss"]
     loss_val = history.history["val_loss"]
+    # print(numpy.min(loss_val[24:]))
 
     # show learning graph
     plt.plot(loss_train, label="Training")
     plt.plot(loss_val, label="Validation")
-    plt.title("Training Curves")
+    plt.title("LSTM - Cross-entropy by Epoch")
+    plt.xlabel("Epoch")
+    plt.ylabel("Cross-entropy")
     plt.legend()
     plt.show()
 
