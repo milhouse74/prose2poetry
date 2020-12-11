@@ -199,9 +199,7 @@ The word pair generation step needs to generate pairs of words that rhyme and ar
 \subsection{Sentence generation}
 \label{sec:languagegen}
 
-The next step after generating a list of semantically related rhyming word pairs is to generate sentences, starting backwards from the end of the sentence. This is to enforce end rhymes in the generated couplets.
-
-Another goal for the generated couplets is that both sentences should refer to the same semantic context. The use of semantically-related end words is to help the sentence generators in achieving this. The section \ref{sec:doc2vec} will evaluate how well this worked in practice.
+The next step after generating the list of rhyming word pairs is to generate sentences, starting backwards from the end of the sentence, to enforce end rhymes. Another goal for the generated couplets is that both sentences should have similar semantic contexts. The use of semantically-related end words is to help the sentence generators in achieving this. The section \ref{sec:doc2vec} will evaluate how well this worked in practice.
 
 \subsubsection{LSTM model}
 \label{sec:lstm}
@@ -249,7 +247,7 @@ A Markov chain is a statistical model which computes probabilities of sequences 
 
 The Markov chain implementation in the \textit{markovify} library takes a corpus of sentences as an input, splits it into words, and builds probabilities of forward word transitions starting from the beginning of a sentence and moving towards the end. From this, new sentences can be generated using the observed word transition probabilities in the input corpus and a provided beginning word.
 
-Additional work was done by \citet{markovifyfork} to implement a backwards Markov chain generator in the \textit{markovify} library. This reverses the order in which sentences from the corpus are consumed to build the model, resulting in transitions that move backwards in a sentence starting from an ending word. This is exactly suitable for the purposes of \textit{prose2poetry}, where an end word is provided as an input, and a new sentence should be generated from knowledge of the input corpus with that end word. The library also has checks to avoid exact recreations of the input text.
+Additional work was done by \citet{markovifyfork} to implement a backwards Markov chain generator in the \textit{markovify} library. This reverses the order in which sentences from the corpus are consumed to build the model, resulting in word transitions transitions that move backwards in a sentence starting from an ending word. This is exactly suitable for the purposes of \textit{prose2poetry}. The library also has checks to avoid exact recreations of the input text.
 
 \subsubsection{Sentence semantic relatedness}
 \label{sec:doc2vec}
@@ -377,7 +375,7 @@ The total couplet score is a weighted sum of the two metrics above, resulting in
 \label{table:weight_couplet_score}
 \end{table}
 
-It was mentioned that the couplet score is focused on form only, and not couplet contents. This can be problematic -- consider the example ``ham ham ham, jam jam jam.'' This couplet has a nearly perfect score of 0.89 (out of 1.0) since it rhymes and has exactly matching meter. However, a human judge wouldn't rate it as good poetry. There were many challenges involved in evaluating the semantic coherence, grammatical correctness, or other aspects of the contents of the couplets. These are discussed in section \ref{sec:discconc}.
+It was mentioned that the couplet score is focused on form only, and not couplet contents. This can be problematic -- consider the example ``ham ham ham, jam jam jam.'' This couplet has a nearly perfect score of 0.89 (out of 1.0) since it rhymes and has exactly matching meter. However, a human judge wouldn't rate it as good poetry. There were many challenges involved in evaluating the semantic coherence, grammatical correctness, or other aspects of the contents of the couplets. These are discussed in section \ref{sec:nlg}.
 
 \textcolor{red}{
 REMOVE NAIVE GENERATOR FROM SCORE TABLE + REMOVE NAIVE FROM EXAMPLE + KEEP ONLY ONE POEM FOR EXAMPLE
@@ -420,7 +418,7 @@ Prose & 0.33 & 0.13 & 0.56 & 0.19 & 0.18 & 0.46 & 0.48 & 0.19 & 0.76 \\ [0.5ex]
 	\hline
 	Naive generator & \makecell[l]{(`regular features , open countenance , with a complexion',\\`this was the conclusion of the first series of reflection')\\(`do not be overpowered by such a little tribute of admiration',\\`she then took a longer time for consideration')} \\ [0.5ex]
 	\hline
-	\textit{prose2poetry} Markov chain & \makecell[l]{(`And I hate Italian singing', `It must have penetrated a part in bringing')\\(`I could never see a better', `I hope , a highly prized letter')} \\ [-1.5ex]
+	\textit{prose2poetry} Markov chain & \makecell[l]{(`And I hate Italian singing', `It must have penetrated a part in bringing')\\(`I could never see a better', `I hope , a highly prized letter')} \\ [0.5ex]
 	\hline
 	\textit{prose2poetry} LSTM & \makecell[l]{(`had her neighborhood drinking', `though her sinking')\\(`he had now required', `would be who retired')} \\ [0.5ex]
 	\hline
@@ -480,11 +478,22 @@ Consider two examples, using WordNet \cite{wordnet} as a lexical resource via NL
 
 There is no readily available mapping between CMUdict pronunciation and WordNet senses. This can only be resolved with a lexical resource that provides combined sense and pronunciation disambiguation -- Wiktionary \cite{wiktionary} is one such option, but scraping it was considered beyond the scope of this paper. The final approach chosen was to ignore ambiguity and return the best rhyme score across all possible pronunciation permutations.
 
-\textcolor{Orchid}{
-\subsection{Couplet content evaluation}
+\subsection{Sentence content evaluation}
 \label{sec:nlg}
-difficulty with NLG, METEOR, BERT next sentence prediction, grammatical content
-}
+
+The biggest difficulty encountered in \textit{prose2poetry} was finding a way to quantitatively evaluate the contents of the couplet. Throughout the development of the couplet scoring function, this was narrowed down to two major criteria:
+
+\begin{tight_enumerate}
+	\item
+		Is the sentence grammatical? This is especially difficult to judge for poetry, which unlike prose writing can break grammatical rules.
+	\item
+		Does the sentence make sense? A human might be able to discern that ``my metallic unicorn ate a purple stapler'' makes less sense than ``my cat drank milk from a white bowl.'' These may both share a (correct) grammatical structure, but understanding that the second sentence makes more sense than the first relies on world knowledge, perhaps even world knowledge specific to a modern Western cultural background.
+
+\end{tight_enumerate}
+
+The field of NLG (Natural Language Generation) evaluation was explored for ideas. \citet{nlgeval} present a survey on popular automated metrics for evaluating machine-generated text in several applications including machine translation and dialogue response systems. They confirmed the original findings of the authors of the METEOR score \cite{meteor} that it correlates well at the sentence level with human judgement.
+
+An important trait of METEOR or other metrics intended for NLG evaluation is that they rely on reference sentences to compare the quality of the generated sentence against. This presents a problem when scoring poetry - what are the references? In fact in an early experiment, the baseline couplets from the Gutenberg poetry corpus were used as reference sentences in METEOR. It was hoped that this would score input couplets high if they resembled good poetry. This did not work -- in practice, the METEOR scores were found to be inappropriate for this task, and they could not distinguish human-judged bad and good sentences.
 
 \textcolor{Orchid}{
 \subsection{Code availability}
