@@ -23,9 +23,7 @@
 \usepackage{makecell}
 \usepackage{placeins}
 \usepackage{graphicx}
-
 \graphicspath{ {./} }
-
 \renewcommand{\UrlFont}{\ttfamily\small}
 
 % This is not strictly necessary, and may be commented out,
@@ -201,9 +199,9 @@ The word pair generation step needs to generate pairs of words that rhyme and ar
 \subsection{Sentence generation}
 \label{sec:languagegen}
 
-\textcolor{Orchid}{
-	(preamble) in this step we will be generating 2 sentences backwards from 2 rhyming word pairs
-}
+The next step after generating a list of semantically related rhyming word pairs is to generate sentences, starting backwards from the end of the sentence. This is to enforce end rhymes in the generated couplets.
+
+Another goal for the generated couplets is that both sentences should refer to the same semantic context. The use of semantically-related end words is to help the sentence generators in achieving this. The section \ref{sec:doc2vec} will evaluate how well this worked in practice.
 
 \subsubsection{LSTM model}
 \label{sec:lstm}
@@ -236,11 +234,22 @@ As you can see in figure \ref{fig:LearningCurves}, the optimal model is quickly 
 
 We direct the reader to section \ref{sec:discconc} for additional discussion and proposition for using neural model for NLG.
 
-\textcolor{Orchid}{
 \subsubsection{Markov chain model}
 \label{sec:markov}
-Markov chain, external library, backwards
-}
+Owing to the challenges in developing and training a successful neural sentence generator outlined in the previous section \ref{sec:lstm}, a model based on a popular open-source Markov chain library, \textit{markovify} \cite{markovify}, was implemented as ``Model B'' of \textit{prose2poetry}.
+
+A Markov chain is a statistical model which computes probabilities of sequences of random variables from a set of possible values, referred to as states \cite[Chapter~8]{jurafskymarkov}. They were first used by \citet{markov} to predict whether the next letter in a sequence was a vowel or a consonant. Figure \ref{fig:markov} shows a graphic of a Markov chain for English word transitions.
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.35]{./markov_chain.png}
+	\caption{Illustration of Markov chain for word transition probabilities \cite{jurafskymarkov}}
+\label{fig:markov}
+\end{figure}
+
+The Markov chain implementation in the \textit{markovify} library takes a corpus of sentences as an input, splits it into words, and builds probabilities of forward word transitions starting from the beginning of a sentence and moving towards the end. From this, new sentences can be generated using the observed word transition probabilities in the input corpus and a provided beginning word.
+
+Additional work was done by \citet{markovifyfork} to implement a backwards Markov chain generator in the \textit{markovify} library. This reverses the order in which sentences from the corpus are consumed to build the model, resulting in transitions that move backwards in a sentence starting from an ending word. This is exactly suitable for the purposes of \textit{prose2poetry}, where an end word is provided as an input, and a new sentence should be generated from knowledge of the input corpus with that end word. The library also has checks to avoid exact recreations of the input text.
 
 \subsubsection{Sentence semantic relatedness}
 \label{sec:doc2vec}
