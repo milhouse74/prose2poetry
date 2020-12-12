@@ -343,6 +343,10 @@ The standard deviation of the couplet score is stable across all the evaluated d
 
 The inverse is true of the meter score. The baselines have a higher mean and a lower standard deviation than the generated couplets. This indicates that syllabic meter is an important device in human poetry. Moreover, there was no consideration of enforcing meter in the sentence generators. This could be a future improvement of \textit{prose2poetry}.
 
+The results showed that our generation couplets scored better than the corpus prose but lower than real poetry. The main driver of this difference is from the meter metric which is lower for our generated poetry. That is as expected as we didn't enforce any meter criteria in the sentence generation. In fact, for the Markov chain model, the meter metric is very similar to the prose corpus.
+
+In terms of variability in the results, we see that the generated sentences are less variable in terms of the rhyme score than actual poetry and the inverse is true for the meter score. This is also as expected for the meter score. 
+
 \subsection{LSTM model discussion}
 \label{sec:discconclstm}
 
