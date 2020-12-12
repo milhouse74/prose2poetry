@@ -56,7 +56,7 @@
 \setlength{\parskip}{0pt}
 }{\end{itemize}}
 
-\title{Prose2poetry -- generating rhyming couplets from Gutenberg novels}
+\title{\textit{prose2poetry} -- Generating rhyming couplets from Gutenberg novels}
 
 \author{Sevag Hanssian \\
   McGill University \\
@@ -186,15 +186,6 @@ The Markov chain implementation in the open-source \textit{markovify} \cite{mark
 
 Additional work was done by \citet{markovifyfork} to implement a backwards Markov chain generator. This reverses the order in which sentences from the corpus are consumed to build the model, resulting in word transitions that move backwards in a sentence starting from an ending word. This is exactly suitable for the purposes of \textit{prose2poetry}.
 
-\subsubsection{Sentence semantic relatedness}
-\label{sec:doc2vec}
-As explained in section \ref{sec:fasttext}, the word pairs were selected to be related in context in the hopes that the two resulting generated sentences would be semantically related as well. An analysis was conducted to validate this assumption with the \textit{doc2vec} sentence embedding \cite{docvec}. The hyperparameters were shown in table \ref{table:HP_fasttext}, and it was trained on the same input corpus.
-
-For the Markov chain model, the cosine distance between the embedding vectors of two generated sentences showed an improvement of 10\% (evaluated across 1,000 generated couplets) when using end words that had a high \textit{FastText} cosine distance, justifying the design of word pair generation. However, the LSTM model only improved by 0.6\%.
-
-% Markov: 0.51799 vs 0.562932 
-% LSTM: 0.607907 vs 0.611643
-
 %%%%%%%%%%%%%%
 % EXP & RESULTS		%
 %%%%%%%%%%%%%%
@@ -214,7 +205,7 @@ A couplet scoring function was developed to evaluate the couplets, consisting of
 \subsubsection{Rhyme score}
 \label{sec:rhymescore}
 
-The rhyme score returns a real value representing the strength of the rhyme between two words. It uses phoneme data from the CMUdict in a weighted sum of three heuristic scores:
+The rhyme score returns a real value representing the strength of the rhyme between two words. It uses phoneme data from the CMUdict in a mean of three heuristic scores:
 \begin{tight_itemize}
 	\vspace{-0.5em}
 	\item \textit{Reverse consecutive phoneme matching} (RCPM):
@@ -268,7 +259,7 @@ Using the pronouncingpy library, the syllabic stress of all of the words in each
 \subsubsection{Couplet score}
 \label{sec:coupletscore}
 
-The total couplet score is an evenly weighted sum of rhyme and meter score, resulting in a single real value $\in [0, 1]$.
+The total couplet score is the mean of rhyme and meter score, resulting in a single real value $\in [0, 1]$.
  The couplet score evaluates form only, and not contents. This can be problematic -- consider the example ``ham ham ham, jam jam jam.'' This couplet has a nearly perfect score of 0.89, but a human judge would (probably) not rate it as good poetry. There were many challenges involved in evaluating the semantic coherence, grammatical correctness, or other aspects of the contents of the couplets. These are discussed in section \ref{sec:nlg}.
 
 \begin{table*}[ht]
@@ -282,11 +273,11 @@ Gutenberg & 0.69 & 0.12 & 0.86 & 0.70 & 0.18 & 0.93 & 0.68 & 0.14 & 0.89 \\ [0.5
 \hline
 PoetryFoundation & 0.69 & 0.12 & 0.85 & 0.70 & 0.19 & 0.93 & 0.68 & 0.14 & 0.89 \\ [0.5ex]
 \hline
-\textit{prose2poetry} LSTM & \textbf{0.63} & 0.12 & 0.82 & 0.68 & 0.16 & 0.91 & 0.58 & 0.18 & 0.88 \\ [0.5ex]
+\textbf{\textit{prose2poetry} LSTM} & \textbf{0.63} & \textbf{0.12} & \textbf{0.82} & \textbf{0.68} & \textbf{0.16} & \textbf{0.91} & \textbf{0.58} & \textbf{0.18} & \textbf{0.88} \\ [0.5ex]
 \hline
-\textit{prose2poetry} Markov chain & \textbf{0.57} & 0.13 & 0.77 & 0.68 & 0.16 & 0.90 & 0.47 & 0.19 & 0.76 \\ [0.5ex]
+\textbf{\textit{prose2poetry} Markov chain} & \textbf{0.57} & \textbf{0.13} & \textbf{0.77} & \textbf{0.68} & \textbf{0.16} & \textbf{0.90} & \textbf{0.47} & \textbf{0.19} & \textbf{0.76} \\ [0.5ex]
 \hline
-Prose & \textbf{0.34} & 0.13 & 0.56 & 0.19 & 0.18 & 0.46 & 0.48 & 0.19 & 0.76 \\ [0.5ex]
+Prose & 0.34 & 0.13 & 0.56 & 0.19 & 0.18 & 0.46 & 0.48 & 0.19 & 0.76 \\ [0.5ex]
 \hline
 \end{tabular}
 
@@ -303,9 +294,9 @@ Prose & \textbf{0.34} & 0.13 & 0.56 & 0.19 & 0.18 & 0.46 & 0.48 & 0.19 & 0.76 \\
 	\hline
 	PoetryFoundation baseline & (`Poets hate to have directives', `They’re on their own, not on collectives') \\ [0.5ex]
 	\hline
-	\textit{prose2poetry} LSTM & (`as that he had so note', `was been now turned wrote') \\ [0.5ex]
+	\textbf{\textit{prose2poetry} LSTM} & \textbf{(`as that he had so note', `was been now turned wrote')} \\ [0.5ex]
 	\hline
-	\textit{prose2poetry} Markov chain & (`And how tired you must not propose', `Mr . Knightley could not oppose') \\ [0.5ex]
+	\textbf{\textit{prose2poetry} Markov chain} & \textbf{(`And how tired you must not propose', `Mr . Knightley could not oppose')} \\ [0.5ex]
 	\hline
 	Prose & (`i thought you meant to go with me', `they would be very much pleased') \\ [0.5ex]
 	\hline
@@ -335,6 +326,16 @@ From each evaluated dataset, one couplet which scored better than the .95 quanti
 The results of the couplet score in table \ref{table:couplet_results} were as anticipated in the hypothesis. The generated couplets scored better than couplets from the prose corpus, but lower than real poetry. The main contributor of this difference is the meter score, which is significantly lower for the generated couplets. This was expected, as meter was not enforced in either model.
 
 In terms of variability in the results, the generated sentences have a more stable rhyme score than the human poetry. This indicates that human poets don't necessarily consider perfect end rhymes as a requirement. The inverse was true for meter, where human poetry scores stably higher. This confirms that syllabic meter is an important device in human poetry. In future work, meter could be incorporated in the generator models.
+
+\subsection{Generated sentence semantic relatedness}
+\label{sec:doc2vec}
+
+As explained in section \ref{sec:fasttext}, the word pairs were selected to be related in context in the hopes that the two resulting generated sentences would be semantically related as well. An analysis was conducted to validate this assumption with the \textit{doc2vec} sentence embedding \cite{docvec}. The hyperparameters were shown in table \ref{table:HP_fasttext}, and it was trained on the same input corpus.
+
+For the Markov chain model, the cosine distance between the embedding vectors of two generated sentences showed an improvement of 10\% (evaluated across 1,000 generated couplets) when using end words that had a high \textit{FastText} cosine distance, justifying the design of word pair generation. However, the LSTM model only improved by 0.6\%.
+
+% Markov: 0.51799 vs 0.562932 
+% LSTM: 0.607907 vs 0.611643
 
 \subsection{LSTM model discussion}
 \label{sec:discconclstm}
