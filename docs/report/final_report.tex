@@ -56,7 +56,7 @@
 \setlength{\parskip}{0pt}
 }{\end{itemize}}
 
-\title{Prose2poetry -- generating rhyming couplets with Natural Language Processing}
+\title{Prose2poetry -- generating rhyming couplets from Gutenberg novels}
 
 \author{Sevag Hanssian \\
   McGill University \\
@@ -224,7 +224,7 @@ The rhyme score returns a real value representing the strength of the rhyme betw
 	\item \textit{Overall phoneme matching} (OPM):
 		OPM counts all common phonemes between a pair of words without considering order. It's essentialy an adapted \citet{ratcliff} string similarity score, using phonemes instead of characters.
 	\item \textit{Syllable count matching} (SCM):
-	SCM measures how close the syllable counts are between the two words.
+	SCM is a ratio of the syllable counts. There is a subtraction by one in the numerator and denominator to allow the SCM to be zero in the worst case.
 \end{tight_itemize}
 
 These are combined in an evenly weighted average $\in [0, 1]$. A rhyme score example is shown in figure \ref{fig:rhymescore}. There are some additions for special cases:
@@ -284,11 +284,11 @@ Gutenberg & 0.69 & 0.12 & 0.86 & 0.70 & 0.18 & 0.93 & 0.68 & 0.14 & 0.89 \\ [0.5
 \hline
 PoetryFoundation & 0.69 & 0.12 & 0.85 & 0.70 & 0.19 & 0.93 & 0.68 & 0.14 & 0.89 \\ [0.5ex]
 \hline
-\textit{prose2poetry} LSTM & 0.63 & 0.12 & 0.82 & 0.68 & 0.16 & 0.91 & 0.58 & 0.18 & 0.88 \\ [0.5ex]
+\textit{prose2poetry} LSTM & \textbf{0.63} & 0.12 & 0.82 & 0.68 & 0.16 & 0.91 & 0.58 & 0.18 & 0.88 \\ [0.5ex]
 \hline
-\textit{prose2poetry} Markov chain & 0.57 & 0.13 & 0.77 & 0.68 & 0.16 & 0.90 & 0.47 & 0.19 & 0.76 \\ [0.5ex]
+\textit{prose2poetry} Markov chain & \textbf{0.57} & 0.13 & 0.77 & 0.68 & 0.16 & 0.90 & 0.47 & 0.19 & 0.76 \\ [0.5ex]
 \hline
-Prose & 0.34 & 0.13 & 0.56 & 0.19 & 0.18 & 0.46 & 0.48 & 0.19 & 0.76 \\ [0.5ex]
+Prose & \textbf{0.34} & 0.13 & 0.56 & 0.19 & 0.18 & 0.46 & 0.48 & 0.19 & 0.76 \\ [0.5ex]
 \hline
 \end{tabular}
 
@@ -337,9 +337,11 @@ From each evaluated dataset, one couplet which scored better than the .95 quanti
 \section{Discussion and conclusion}
 \label{sec:discconc}
 
-\textcolor{green}{
-Results interpretation here. "Our poems scored well, stress score showed real poems have good meter, etc."
-}
+The results of the couplet score in table \ref{table:couplet_results} were as anticipated in the hypothesis. The baselines of human-written couplets from Gutenberg and PoetryFoundation achieved a mean couplet score of 0.69. Non-rhyming couplets extracted from the original prose corpus had a low mean of 0.34. The \textit{prose2poetry} generators scored in between, with a mean couplet score of 0.63 and 0.57 for the LSTM and Markov chain models respectively.
+
+The standard deviation of the couplet score is stable across all the evaluated datasets. However, if the rhyme and meter scores are examined individually, there are some additional observations. The baseline couplets have a higher standard deviation in their rhyme score. The rhyme score function from section \ref{sec:rhymescore} has opinionated rules, including rewarding longer rhymes. These rules are not necessarily followed by real poets.
+
+The inverse is true of the meter score. The baselines have a higher mean and a lower standard deviation than the generated couplets. This indicates that syllabic meter is an important device in human poetry. Moreover, there was no consideration of enforcing meter in the sentence generators. This could be a future improvement of \textit{prose2poetry}.
 
 \subsection{LSTM model discussion}
 \label{sec:discconclstm}
