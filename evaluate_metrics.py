@@ -166,17 +166,11 @@ def main():
             )
         elif i == 12:
             print(
-                "\nNaive generator, {0} couplets\n----------------------------------------------\n".format(
-                    scores_ndarray.shape[0]
-                )
-            )
-        elif i == 16:
-            print(
                 "\nMarkov generator, {0} couplets\n----------------------------------------------\n".format(
                     scores_ndarray.shape[0]
                 )
             )
-        elif i == 20:
+        elif i == 16:
             print(
                 "\nLSTM generator, {0} couplets\n----------------------------------------------\n".format(
                     scores_ndarray.shape[0]

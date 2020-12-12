@@ -52,8 +52,6 @@ def rhyme_score(word1, word2, penalize_short_word=True):
         min_len_phone = min(len(phones_seq1), len(phones_seq2))
 
         ### 1.a) PHONEME MATCHING ###
-        print([phone for phone in phones_seq2])
-        print([phone for phone in phones_seq1])
         M = sum(
             [1 for phone in phones_seq1 if phone in phones_seq2]
             + [1 for phone in phones_seq2 if phone in phones_seq1]
@@ -79,10 +77,6 @@ def rhyme_score(word1, word2, penalize_short_word=True):
             )
         else:
             score_syllable_count = 1
-
-        print(score_consecutive_phone)
-        print(score_phone_matching)
-        print(score_syllable_count)
 
         ### COMBINED SCORE ###
         rhyme_score = (
