@@ -85,16 +85,9 @@
 
 Poetry is a form of writing that condenses emotions, stories, and thoughts into verse. Devices such as rhyme and meter are used to impart prosody, or a musical quality, to the written lines, transforming them beyond mere information transfer. Underneath the surface, or form of the poem, metaphor is often used to weave subtexts and hidden meanings. There are many styles of poem ranging from the haiku and sonnet, with strict rules, to the more flexible free verse \citep{poem_type}.
 
-A simple form of poetry is the rhyming couplet, a pair of rhyming sentences that form a unit \cite{couplet_def}. For simplicity throughout this paper, any two-line pair where the last words rhyme -- known as end rhymes \cite{end_rhyme_def} -- will be considered a valid couplet. This ignores metaphor and other subjective aspects of poetry that are hard to define and measure, and also ignores more complex rhyming structures such as middle rhyme \cite{internal_rhyme_def}. A couplet example is provided in figure \ref{fig:couplet_example}.
+A simple form of poetry is the rhyming couplet, a pair of rhyming sentences that form a unit \cite{couplet_def}. For additional simplicity, metaphor and other subjective aspects of poetry that are hard to define and measure are ignored, and the only rhyme structure considered is end rhyme \cite{end_rhyme_def}. \textit{The farmer milked the goat, while he shivered in his coat} is an example of a couplet with end rhymes.
 
-\begin{figure}
-	\textit{The farmer milked the goat,} \newline
-	\textit{While he shivered in his coat}
-\caption{Example of a couplet with end rhymes}
-\label{fig:couplet_example}
-\end{figure}
-
-The model proposed by this paper, named \textit{prose2poetry}, will take a non-rhyming prose corpus (e.g. an English novel) and a seed word as inputs. As its output, it will generate rhyming couplets based on the theme of the seed word, built from the vocabulary and language of the input corpus. To judge the success of the model, a quantitative couplet score is proposed. The scores of the generated couplets will be compared to scores of human-written couplets in select baseline corpora.
+The model proposed by this paper, \textit{prose2poetry}, will take a non-rhyming prose corpus (e.g. an English novel) and a seed word as inputs. As its output, it will generate rhyming couplets based on the theme of the seed word, built from the vocabulary and language of the input corpus. To judge the success of the model, a quantitative couplet score is proposed. The scores of the generated couplets will be compared to scores of human-written couplets.
 
 %%%%%%%%%%%%%%
 % RELATED WORK		%
@@ -106,7 +99,7 @@ The task of generating poetry has been explored by \citet{cole}, \citet{hopkins-
 
 A paper by \citet{keswarani} describes several ideas for NLP-driven rhyme and poem scoring for poetry classification, which could be used as a basis for a couplet scoring function.
 
-A simplifying decision in this paper was to ignore the artistic and metaphorical aspects of poetry and focus only on the form. \citet{bena2020introducing} criticize this approach, claiming that ``forcing a model to adhere to specific rules or templates, or summarizing or translating a given text to generate new poetry is unlikely to lead to the artistically expressive quality.'' They proposed to fine-tune the pre-trained language model GPT-2 with creative elements through emotion classification.
+A simplifying decision in this paper was to ignore the artistic and metaphorical aspects of poetry and focus only on the form. \citet{bena2020introducing} criticize this approach, claiming that ``summarizing or translating a given text to generate new poetry is unlikely to lead to ... artistically expressive quality.'' They proposed to fine-tune the pre-trained language model GPT-2 \cite{gpt2} with creative elements through emotion classification.
 
 %%%%%%%%%%%%%%
 % METHOD			%
@@ -116,7 +109,7 @@ A simplifying decision in this paper was to ignore the artistic and metaphorical
 
 \subsection{Input corpus}
 
-The input corpora were free and public domain English novels from the \textit{Natural Language Toolkit} (NLTK) Gutenberg dataset \cite[Chapter~2]{gutenbergnltk}. These are available in NLTK. Additional preprocessing done was to drop tokens that only consisted of punctuation, strip punctuation from words, and omit various author, title page, chapter, and volume headings. The specific input corpus used to train and generate the results in this paper was \textit{Emma} by Jane Austen.
+The input corpora tested were free and public domain English novels from the \textit{Natural Language Toolkit} (NLTK) Gutenberg dataset \cite[Chapter~2]{gutenbergnltk}. Additional preprocessing done was to drop tokens that only consisted of punctuation, strip punctuation from words, and omit various author, title page, chapter, and volume headings. The novel used to train and generate the results in this paper was \textit{Emma} by Jane Austen.
 
 \subsection{Generating word pairs}
 
@@ -124,12 +117,12 @@ The input corpora were free and public domain English novels from the \textit{Na
 
 From the related works section in \ref{sec:related}, \citet{keswarani}, \citet{cole}, and \citet{hopkins-kiela-2017} use the CMUdict phoneme dictionary \cite{cmudict}, either directly or indirectly through the alternative interface in the pronouncingpy Python library \cite{pronouncingpy}. The CMUdict provides pronunciations for words with the ARPAbet phonetic transcription codes \cite[Chapter~27]{jurafsky}.
 
-The pronouncingpy library includes rhyming word lookups. The implementation extracts the rhyming part from the phonemes of the target word, which extends from the stressed syllable closest to the end of the word to the last phoneme. It returns words with the same rhyming part. \citet{cole} used this function to extract rhyming pairs of sentences from the Gutenberg poetry corpus \cite{gutenbergpoetry} to prepare a corpus of rhyming couplets
+The pronouncingpy library includes rhyming word lookups. The implementation extracts the rhyming part from the phonemes of the target word, which extends from the stressed syllable closest to the end of the word to the last phoneme. It returns words with the same rhyming part. \citet{cole} used this function to extract rhyming couplets from the Gutenberg poetry corpus \cite{gutenbergpoetry}.
 
 \subsubsection{Word embedding}
 \label{sec:fasttext}
 
-The word pair generation step needs to generate pairs of words that rhyme and are also semantically or contextually related. The approach taken to quantify the semantic context of the two words was the FastText word embedding \cite{fasttext}, which is similar to word2vec \cite{wordvec} but handles out-of-vocabulary better. The word embedding is trained on the input prose corpus. This ensures that the vocabulary of the generated rhyming pairs come from the input corpus. The hyperparameters selected are shown in table \ref{table:HP_fasttext}.
+The word pair generation step needs to generate pairs of words that rhyme and are also semantically related. The \textit{FastText} word embedding \cite{fasttext}, which handles out-of-vocabulary better than \textit{word2vec} \cite{wordvec}, was used to quantify the semantic context of two words. The word embedding is trained on the input prose corpus, ensuring that the generated rhyming words come from the vocabulary of the input. Hyperparameters are shown in table \ref{table:HP_fasttext}.
 
 \begin{table}[ht]
 \centering
@@ -154,36 +147,21 @@ The word pair generation step needs to generate pairs of words that rhyme and ar
 \begin{tight_enumerate}
 	\item \textit{Theme selection}: To be able to generate a pair of words, the system needs to have a \textit{seed word}. This can be considered the theme of the couplets that will be generated.
 	\item \textit{Gather context neighbors of theme}: From the seed word, a list of the most semantically similar words is generated. This uses the FastText model's cosine distance to rank the context neighbors of a word by most related.
-	\item \textit{Word-pair scoring}: From the previous list, every possible pair can be ranked by their semantic distance from each other. The score is multiplied by 1 if the words rhyme (using pronouncingpy), and 0 if they don't. The top-scoring pairs in the final list are used as inputs to the sentence generation.
+	\item \textit{Word-pair scoring}: From the previous list, every possible pair can be ranked by their semantic distance from each other. The score is multiplied by 1 if the words rhyme (using pronouncingpy), and 0 if they don't. The top-scoring pairs in the final list are used as inputs to sentence generation.
 \end{tight_enumerate}
 
 \subsection{Sentence generation}
 \label{sec:languagegen}
 
-The next step after generating the list of rhyming word pairs is to generate sentences, starting backwards from the end of the sentence, to enforce end rhymes. A goal for the generated couplets is that both sentences should be semantically related. The use of semantically-related end words is to help the sentence generators achieve this. Section \ref{sec:doc2vec} describes how well this worked in practice.
+The next step after generating the list of rhyming word pairs is to generate sentences, starting backwards from the end of the sentence, to enforce end rhymes.
 
 \subsubsection{LSTM model}
 \label{sec:lstm}
 Recurrent neural networks, or RNNs, are a common choice in modeling sequential data \cite{rnn}. Gated recurrent unit (GRU) models \cite{gru} and long-short-term-memory (LSTM) models \cite{lstm} are both variants of RNNs. In this task, LSTMs were found to produce the best results.
 
-Sentences from the input corpus in reverse order are used as training data. The input to the LSTM is a sliding window of the last five words of the sentence in reverse order, represented with the FastText word embedding from section \ref{sec:fasttext}. Initially, the window contains only the end word. As words are generated by the model, they are inserted in the window. The activation function of the last layer is a softmax ($\in [0, 1]$) representing the probability that a word from the input vocabulary precedes the words in the sliding window. Three candidates are considered and one is randomly selected to avoid overfitting. The sentence is finished when a punctuation token is generated.
+Sentences from the input corpus in reverse order are used as training data. The input to the LSTM is a sliding window of the last five words of the sentence in reverse order, represented with the \textit{FastText} word embedding from section \ref{sec:fasttext}. Initially, the window contains only the end word. New words generated by the model are inserted in the window. The activation function of the last layer is a softmax ($\in [0, 1]$) representing the probability that a word from the input vocabulary precedes the sliding window. Three candidates are considered and one is randomly selected. The sentence is finished when a punctuation token is generated.
 
-For the hidden layer size of the LSTM, the design was fine-tuned to maximize the cross-entropy loss on the validation data (20\% of the input prose sentences). The results are shown in table \ref{table:HiddenLayerSizeLSTM}. Similarly, a batch size of 128 was found to be optimal.
-
-\begin{table}[ht]
-\centering
-\begin{tabular}{lll c c c}
-	\hline\hline
-	Size & 64 & 128 & 256 \\ [0.5ex]
-	\hline
-	Loss & 6.56 & 6.61 & 6.68 \\ [0.5ex]
-	\hline\hline
-\end{tabular}
-\caption{Loss vs. LSTM hidden layer size}
-\label{table:HiddenLayerSizeLSTM}
-\end{table}
-
-As can be seen in figure \ref{fig:LearningCurves}, the model quickly overfits to the input prose corpus. The sentences generated by the LSTM model were of overall poor quality (by human judgement) when observed. It is speculated that using only one English novel as an input prose corpus is not enough data, as neural models generally tend to be data-hungry \cite{datahungry}.
+The LSTM was designed to have a single hidden layer with 64 units, and use a batch size of 128. These settings minimized the cross-entropy loss on the validation data (using an 80\%/20\% train/validation split). As can be seen in figure \ref{fig:LearningCurves}, the model quickly overfits to the input prose corpus. The sentences generated by the LSTM model were of poor quality. It is speculated that using only one English novel as an input is not enough data for a neural model. Section \ref{sec:discconclstm} contains further discussion of the LSTM model.
 
 \begin{figure}[h]
     \centering
@@ -192,30 +170,26 @@ As can be seen in figure \ref{fig:LearningCurves}, the model quickly overfits to
     \label{fig:LearningCurves}
 \end{figure}
 
-Section \ref{sec:discconclstm} contains an additional discussion on the LSTM model.
-
 \subsubsection{Markov chain model}
 \label{sec:markov}
-Owing to the challenges in developing and training a successful neural sentence generator outlined in the previous section \ref{sec:lstm}, a model based on a popular open-source Markov chain library, \textit{markovify} \cite{markovify}, was implemented as the second generator of \textit{prose2poetry}.
-
-A Markov chain is a statistical model which computes probabilities of sequences of random variables from a set of possible values, referred to as states \cite[Chapter~8]{jurafskymarkov}. They were first used by \citet{markov} to predict whether the next letter in a sequence was a vowel or a consonant. Figure \ref{fig:markov} shows a graphic of a Markov chain for English word transitions.
+Owing to the challenges in developing and training a successful neural sentence generator outlined in the previous section \ref{sec:lstm}, a model based on the open-source Markov chain library, \textit{markovify} \cite{markovify}, was implemented as the second generator. A Markov chain is a statistical model which computes probabilities of sequences of variables from a set of possible values \cite[Chapter~8]{jurafskymarkov}. Figure \ref{fig:markov} shows a graphic of a Markov chain for word transitions.
 
 \begin{figure}
 	\centering
 	\includegraphics[scale=0.35]{./markov_chain.png}
-	\caption{Illustration of Markov chain for word transition probabilities \cite{jurafskymarkov}}
+	\caption{Markov chain for word transition probabilities \cite{jurafskymarkov}}
 \label{fig:markov}
 \end{figure}
 
-The Markov chain implementation in the \textit{markovify} library takes a corpus of sentences as an input, splits it into words, and builds probabilities of forward word transitions starting from the beginning of a sentence and moving towards the end. From this, new sentences can be generated using the observed word transition probabilities in the input corpus and a provided beginning word.
+The Markov chain implementation in the \textit{markovify} library takes a text corpus as an input, splits it into sentences, and builds probabilities of forward word transitions starting from the beginning of each sentence and moving towards the end. New sentences are generated from a provided beginning word using the word transition probabilities observed in the input corpus.
 
-Additional work was done by \citet{markovifyfork} to implement a backwards Markov chain generator in the \textit{markovify} library. This reverses the order in which sentences from the corpus are consumed to build the model, resulting in word transitions that move backwards in a sentence starting from an ending word. This is exactly suitable for the purposes of \textit{prose2poetry}. The library also has checks to avoid exact recreations of the input text.
+Additional work was done by \citet{markovifyfork} to implement a backwards Markov chain generator. This reverses the order in which sentences from the corpus are consumed to build the model, resulting in word transitions that move backwards in a sentence starting from an ending word. This is exactly suitable for the purposes of \textit{prose2poetry}.
 
 \subsubsection{Sentence semantic relatedness}
 \label{sec:doc2vec}
-As explained in section \ref{sec:fasttext}, the word pairs were selected to be related in context in the hopes that the two resulting generated sentences would be semantically related as well. An analysis was conducted to validate this assumption with the \textit{doc2vec} sentence embedding \cite{docvec}. The hyperparameters are shown in \ref{table:HP_fasttext}, and it was trained on the same input corpus.
+As explained in section \ref{sec:fasttext}, the word pairs were selected to be related in context in the hopes that the two resulting generated sentences would be semantically related as well. An analysis was conducted to validate this assumption with the \textit{doc2vec} sentence embedding \cite{docvec}. The hyperparameters were shown in table \ref{table:HP_fasttext}, and it was trained on the same input corpus.
 
-For the Markov chain model, the cosine distance between the embedding vectors of two generated sentences showed an improvement of 10\% (evaluated across 1,000 generated couplets) when using end words that had a high FastText cosine distance. This justifies the design choice of ranking the generated rhyming word pairs by semantic similarity. The LSTM model saw an insignificant improvement of 0.6\%.
+For the Markov chain model, the cosine distance between the embedding vectors of two generated sentences showed an improvement of 10\% (evaluated across 1,000 generated couplets) when using end words that had a high \textit{FastText} cosine distance. This justifies the design choice of ranking the generated rhyming word pairs by semantic similarity. The LSTM model saw an insignificant improvement of 0.6\%.
 
 % Markov: 0.51799 vs 0.562932 
 % LSTM: 0.607907 vs 0.611643
@@ -223,7 +197,7 @@ For the Markov chain model, the cosine distance between the embedding vectors of
 %%%%%%%%%%%%%%
 % EXP & RESULTS		%
 %%%%%%%%%%%%%%
-\section{Experiments and Results}
+\section{Results}
 \label{sec:results}
 
 \subsection{Baseline corpora}
@@ -236,33 +210,23 @@ The filtering process uses the rhymes function available in the pronouncingpy li
 \subsection{Couplet evaluation}
 \label{sec:coupleteval}
 
-A couplet scoring function was developed to evaluate the couplets. The score focuses only on the form of the couplets. This is measured with two components -- the end word rhyme score, and a stress score which measures syllabic meter \cite{meter_def}.
+A couplet scoring function was developed to evaluate the couplets, consisting of two components -- the end word rhyme score, and a stress score which measures syllabic meter \cite{meter_def}.
 
 \subsubsection{Rhyme score}
 \label{sec:rhymescore}
+
 The rhyme score returns a real value representing the strength of the rhyme between two words. It uses phoneme data from the CMUdict in a weighted sum of three heuristic scores:
 \begin{tight_itemize}
 	\vspace{-0.5em}
 	\item \textit{Reverse consecutive phoneme matching} (RCPM):
-	RCPM counts, in reverse order starting from the end of both words, how many consecutive phoneme matches occur between the two words, normalized by the maximum possible matches. Let $c^{(a,b)}_{\text{phoneme}}$ be the reverse consecutive phoneme matches between words $a$ and $b$ and let $n^{(i)}_{\text{phoneme}}, i = {a, b}$ be the phoneme count for the words $a$ and $b$, then:
-	$$\textrm{RCPM}^{(a,b)} = \frac{c^{(a,b)}_{\text{phoneme}}}{\min(n^{(a)}_{\text{phoneme}}, n^{(b)}_{\text{phoneme}})}$$
+	RCPM counts, in reverse order starting from the end of both words, how many consecutive phoneme matches occur between the two words, normalized by the maximum possible matches.
 	\item \textit{Overall phoneme matching} (OPM):
-		OPM counts all common phonemes between a pair of words without considering order. Let $m^{(a,b)}_{\text{phoneme}}$ be the total number of phoneme matches between word $a$ and $b$, and $n^{(i)}_{\text{phoneme}}, i = {a, b}$ be the phoneme counts for words $a$ and $b$, then:
-		$$\textrm{OPM}^{(a,b)} = \frac{2 * m^{(a,b)}_{\text{phoneme}}}{n^{(a)}_{\text{phoneme}} + n^{(b)}_{\text{phoneme}}}$$
-		This can be considered an adapted \citet{ratcliff} string similarity score with phonemes instead of characters.
+		OPM counts all common phonemes between a pair of words without considering order. It's essentialy an adapted \citet{ratcliff} string similarity score, using phonemes instead of characters.
 	\item \textit{Syllable count matching} (SCM):
-	The last score selects for words close in number of syllables. Let $n^{(i)}_{\text{syllable}}, i = {a, b}$ be the total counts of syllables in words $a$ and $b$.
-	\begin{equation}
-	\textrm{SCM}^{(a,b)} = 
-	\begin{cases}
-	\nonumber 1 \text{ if $\max(n^{(a)}_{\text{syllable}}, n^{(b)}_{\text{syllable}})$ = 1}\\
-	\nonumber \frac{\min(n^{(a)}_{\text{syllable}}, n^{(b)}_{\text{syllable}}) - 1}{\max(n^{(a)}_{\text{syllable}}, n^{(b)}_{\text{syllable}}) - 1} \text{ otherwise}\\
-        \end{cases}
-	\end{equation}
-	The subtraction by 1 is to ensure that the lowest possible SCM score can be 0.
+	SCM measures how close the syllable counts are between the two words.
 \end{tight_itemize}
 
-These are combined in an evenly weighted average. Examples of rhyme scores are shown in the code example in figure \ref{fig:rhymescorecode}. There are some additions for special cases:
+These are combined in an evenly weighted average $\in [0, 1]$. A rhyme score example is shown in figure \ref{fig:rhymescore}. There are some additions for special cases:
 \begin{tight_enumerate}
 	\vspace{-0.5em}
 	\item
@@ -270,18 +234,14 @@ These are combined in an evenly weighted average. Examples of rhyme scores are s
 	\item
 		Longer rhymes score higher, up to a ceiling of 6 phonemes. Without this, single-syllable words tend to dominate the rhyme score.
 	\item
-		If there are multiple possible pronunciations, rhyme score returns the maximum score across all the pronunciation permutations for word $a$ and $b$, discussed further in section \ref{sec:synset}.
+		If there are multiple possible pronunciations, rhyme score returns the maximum score across all the pronunciation permutations for both words, discussed further in section \ref{sec:synset}.
 \end{tight_enumerate}
 
-\begin{figure}
-\begin{Verbatim}[fontsize=\small]
->>> rhyme_score('affection', 'perfection')
-0.88
->>> rhyme_score('affection', 'disgust')
-0.075
-\end{Verbatim}
-\caption{Some examples of rhyme score}
-\label{fig:rhymescorecode}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.45]{rhyme_score.png}
+    \caption{Rhyme score for \textit{alligator} and \textit{crocodile}}
+    \label{fig:rhymescore}
 \end{figure}
 
 \subsubsection{Meter score}
@@ -309,8 +269,8 @@ Using the pronouncingpy library, the syllabic stress of all of the words in each
 \subsubsection{Couplet score}
 \label{sec:coupletscore}
 
-The total couplet score is an evenly weighted sum of the two metrics above, resulting in a single real value $\in [0, 1]$.
- It was mentioned that the couplet score is focused on form only, and not couplet contents. This can be problematic -- consider the example ``ham ham ham, jam jam jam.'' This couplet has a nearly perfect score of 0.89 (out of 1.0) since it rhymes and has exactly matching meter. However, a human judge wouldn't rate it as good poetry. There were many challenges involved in evaluating the semantic coherence, grammatical correctness, or other aspects of the contents of the couplets. These are discussed in section \ref{sec:nlg}.
+The total couplet score is an evenly weighted sum of rhyme and meter score, resulting in a single real value $\in [0, 1]$.
+ The couplet score evaluates form only, and not contents. This can be problematic -- consider the example ``ham ham ham, jam jam jam.'' This couplet has a nearly perfect score of 0.89 (out of 1.0) since it rhymes and has exactly matching meter. However, a human judge wouldn't rate it as good poetry. There were many challenges involved in evaluating the semantic coherence, grammatical correctness, or other aspects of the contents of the couplets. These are discussed in section \ref{sec:nlg}.
 
 \begin{table*}[ht]
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|l|l|c|c|c|c|c|c|c|c|c|c|}
@@ -357,15 +317,18 @@ Prose & 0.33 & 0.13 & 0.56 & 0.19 & 0.18 & 0.46 & 0.48 & 0.19 & 0.76 \\ [0.5ex]
 
 \subsection{Results}
 \label{sec:results}
+
 \subsubsection{Quantitative assessment}
 
 The results in table \ref{table:couplet_results} were evaluated on 1,000 couplets randomly selected from the baselines and \textit{prose2poetry} generator models. These were selected to be a representative sample from the larger datasets. The evaluation was repeated with different RNG seeds, observing that different random selections of couplets from the same source tended to have a stable score.
+
+The input corpus was \textit{Emma} by Jane Austen, and the seed words for the \textit{prose2poetry} LSTM and Markov chain generators were the following: love, hate, pride, prejudice, justice, romance.
 
 The prose baseline was created by selecting random sentence pairs from the input English novel corpus without any filtering. The total couplet score is shown, as well as each of the subcomponents for further discussion. The mean, standard deviation, and .95 quantile were chosen as statistical metrics.
 
 \subsubsection{Qualitative assessment}
 
-From each evaluated dataset, one couplet which scored better than the .95 quantile score is included in table \ref{table:bestcouplets} for the readers to enjoy and judge for themselves.
+From each evaluated dataset, one couplet which scored better than the .95 quantile score is included in table \ref{table:bestcouplets} for the readers to enjoy.
 
 %%%%%%%%%%%%%%
 % DISC & CONC		%
@@ -377,11 +340,6 @@ From each evaluated dataset, one couplet which scored better than the .95 quanti
 Results interpretation here. "Our poems scored well, stress score showed real poems have good meter, etc."
 }
 
-\textcolor{Orchid}{
-\subsection{Sevag discussion/conclusion ideas}
-sevag ideas
-}
-
 \subsection{LSTM model discussion}
 \label{sec:discconclstm}
 
@@ -390,30 +348,20 @@ The trained LSTM described in section \ref{sec:lstm} did not perform to the expe
 \subsection{Multiple pronunciations and sense disambiguation}
 \label{sec:synset}
 
-Difficulty was encountered in the rhyme score when trying to associate different pronunciations of homographs with their respective senses or parts of speech. \citet{hopkins-kiela-2017} encountered the same difficulty. Consider two examples, using WordNet \cite{wordnet} as a lexical resource:
-\begin{tight_enumerate}
-	\vspace{-0.5em}
-	\item
-		In the CMUdict, there are two pronunciations for ``bow'': like ``cow'' or like ``snow''. In WordNet, there are fourteen synsets for ``bow'', and two different parts of speech.
-	\item
-		In the CMUdict, there are two pronuncations for ``defect'': noun with beginning emphasis ``DEE-fect'', or verb with end emphasis ``de-FECT''. In WordNet, there are five synsets for ``defect'', and two different parts of speech.
-\end{tight_enumerate}
+Associating different pronunciations of homographs with their respective senses or parts of speech proved difficult, a problem also noted by \citet{hopkins-kiela-2017}. Consider an example, using WordNet \cite{wordnet} as a lexical resource. There are two pronunciations for ``bow'' in the CMUdict: like ``cow'' or like ``snow''. In WordNet, there are fourteen synsets for ``bow'', and two different parts of speech.
 
-There is no readily available mapping between CMUdict pronunciation and WordNet senses. This can only be resolved with a lexical resource that provides combined sense and pronunciation disambiguation -- Wiktionary \cite{wiktionary} is one such option, but scraping it was considered beyond the scope of this paper. The final approach chosen was to ignore ambiguity and return the best rhyme score across all possible pronunciation permutations.
+There is no readily available mapping between CMUdict pronunciation and WordNet senses. This can only be resolved with a lexical resource that provides combined sense and pronunciation disambiguation -- Wiktionary \cite{wiktionary} is one such option, but scraping it was considered beyond the scope of this paper. The final approach chosen was to ignore ambiguity and return the best rhyme score across all pronunciation permutations.
 
 \subsection{Sentence content evaluation}
 \label{sec:nlg}
 
-The biggest difficulty encountered in \textit{prose2poetry} was finding a way to quantitatively evaluate the contents of the couplet. Throughout the development of the couplet scoring function, this was narrowed down to two major criteria -- are the two sentences related semantically, and are the two sentences grammatically correct. The latter is especially tricky with poetry, which does not necessarily need to strictly obey grammar. Semantic relatedness was covered in section \ref{sec:doc2vec}.
+The biggest difficulty encountered in \textit{prose2poetry} was in quantitatively evaluating the contents of the couplet. Sentence correctness is especially tricky with poetry, which does not necessarily need to strictly obey grammar. The field of NLG evaluation was explored for ideas to evaluate correctness. \citet{nlgeval} present a survey on popular automated metrics for evaluating machine-generated text in several applications including machine translation. They found that METEOR \cite{meteor} correlates well at the sentence level with human judgement.
 
-The field of NLG (Natural Language Generation) evaluation was explored for ideas to evaluate grammatical correctness. \citet{nlgeval} present a survey on popular automated metrics for evaluating machine-generated text in several applications including machine translation and dialogue response systems. They found that METEOR \cite{meteor} correlates well at the sentence level with human judgement.
+A requirement of automated NLG evaluation metrics is reference sentences to compare the inputs to. It is unclear what the references should be when evaluating poetry. In an early experiment, the baseline Gutenberg poetry corpus was used as reference sentences in METEOR, hoping that this would assign high scores to good poetry. This did not provide any meaningful results, and NLG metrics were deemed inappropriate for the task of evaluating couplets.
 
-An important requirement of automated NLG evaluation metrics reference sentences to compare the inputs to. When scoring poetry, it is unclear what the references should be. In an early experiment, the baseline couplets from the Gutenberg poetry corpus were used as reference sentences in METEOR. It was hoped that this would score generated couplets high if they resembled good poetry. This did not work -- in practice, the METEOR scores were found to be inappropriate for this task, and they could not distinguish human-judged bad and good sentences.
-
-\textcolor{Orchid}{
 \subsection{Code availability}
-Describe open source code location, GitHub link, package structure (very brief), etc.
-}
+
+The Python code for \textit{prose2poetry} is released as an open-source project \footnote{https://github.com/milhouse74/prose2poetry}.
 
 %%%%%%%%%%%%%%
 % STAT OF CONT		%
@@ -421,6 +369,9 @@ Describe open source code location, GitHub link, package structure (very brief),
 \section{Statement of contributions}
 \label{sec:contributions}
 Sevag Hanssian worked on finding different poem baselines \& the prose dataset, creating the coding architecture, developing the couplet scoring and running the experiments. François Milot developed the word embedding (FastText), the doc2vec training, the word pair generation and design of the rhyme score. Also, the design and direction of the project have been decided as a group. 
+
+\vfill
+\clearpage % force a page break before references
 
 \bibliographystyle{acl_natbib}
 \bibliography{final_report}
