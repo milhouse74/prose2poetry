@@ -5,7 +5,7 @@ import itertools
 from prose2poetry.vector_models import FasttextModel
 from prose2poetry.couplet_score import CoupletScorer
 from prose2poetry.corpora import ProseCorpus, GutenbergCouplets
-from prose2poetry.generators import MarkovChainGenerator
+from prose2poetry.generators import MarkovChainGenerator, LSTMModel1
 import argparse
 import random
 
@@ -84,12 +84,17 @@ def main():
     # sort in reverse order
     all_results = sorted(all_results, key=lambda x: x[0], reverse=True)
 
-    generator = MarkovChainGenerator(corpus, memory_growth=args.memory_growth)
+    generator1 = MarkovChainGenerator(corpus, memory_growth=args.memory_growth)
+    couplets1 = list(generator1.generate_couplets(all_results, n=1))
 
-    couplets = generator.generate_couplets(all_results, n=1000)
-    for couplet in couplets:
-        print("Markov chain generated couplet:\n\t{0}".format(couplet))
-        print("\tscore: {0}".format(CoupletScorer.calculate_scores(couplet)[0]))
+    generator2 = LSTMModel1(corpus, ft_model, memory_growth=args.memory_growth)
+    couplets2 = list(generator2.generate_couplets(all_results, n=1))
+
+    print("Markov chain generated couplet:\n\t{0}".format(couplets1[0]))
+    print("\tscore: {0}".format(CoupletScorer.calculate_scores(couplets1[0])[0]))
+
+    print("LSTM generated couplet:\n\t{0}".format(couplets2[0]))
+    print("\tscore: {0}".format(CoupletScorer.calculate_scores(couplets2[0])[0]))
 
     return 0
 

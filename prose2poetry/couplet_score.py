@@ -43,7 +43,9 @@ class CoupletScorer:
             stress_strings.append(stress_string)
 
         ### rhyme score
-        rhyme_score_ = rhyme_score(last_words[0], last_words[1], penalize_short_word=False)
+        rhyme_score_ = rhyme_score(
+            last_words[0], last_words[1], penalize_short_word=False
+        )
 
         ### stress score
         stress_string_score = difflib.SequenceMatcher(

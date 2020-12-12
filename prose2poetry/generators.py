@@ -18,7 +18,6 @@ import time
 
 
 def _train_and_save_model_lstm_1(prose_corpus, ft_model, vocab, model_path, memory=5):
-
     data = numpy.asarray(prose_corpus.words)
 
     # Embedding and one-hot
@@ -108,7 +107,7 @@ class LSTMModel1:
         gen_sent = [
             gen_word_i,
         ]
-        while gen_word_i not in ['.', ';', '!', '?']:
+        while gen_word_i not in [".", ";", "!", "?"]:
             memory_adjusted = min(self.memory, len(gen_sent))
 
             pred = numpy.asarray(
@@ -129,7 +128,6 @@ class LSTMModel1:
         iters = 0
         n_old = 0
         while len(ret) < n:
-            print("here we go!")
             for rhyming_pair in rhyming_pairs:
                 print("rhyming pair: {0}".format(rhyming_pair))
                 # rhyming_pair[0] is the rhyme score
@@ -158,40 +156,6 @@ class LSTMModel1:
         return ret
 
 
-class NaiveGenerator:
-    def __init__(self, prose_corpus):
-        # iterate through the prose corpus
-        # find all last words that rhyme, collect these into "couplets"
-
-        self.last_words = defaultdict(list)
-        for sent in prose_corpus.sents:
-            if not sent:
-                continue
-
-            # accumulate all sentences that end with the same last word
-            self.last_words[sent[-1]].append(sent)
-
-        last_word_pairs = list(itertools.combinations(self.last_words.keys(), 2))
-
-        self.rhymes = []
-
-        for i, word_pair in enumerate(last_word_pairs):
-            if word_pair[1] in pronouncing.rhymes(word_pair[0]):
-                self.rhymes.append(word_pair)
-
-    def generate_couplets(self, n=10):
-        ret = []
-        for pair in self.rhymes[:n]:
-            ret.append(
-                [
-                    # pick the shortest candidates
-                    " ".join(min(self.last_words[pair[0]], key=len)),
-                    " ".join(min(self.last_words[pair[1]], key=len)),
-                ]
-            )
-        return ret
-
-
 class MarkovChainGenerator:
     def __init__(self, prose_corpus, memory_growth=False):
         if memory_growth:
@@ -212,7 +176,6 @@ class MarkovChainGenerator:
         iters = 0
         n_old = 0
         while len(ret) < n:
-            print("here we go!")
             for rhyming_pair in rhyming_pairs:
                 print("rhyming pair: {0}".format(rhyming_pair))
                 try:

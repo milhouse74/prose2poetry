@@ -88,7 +88,9 @@ def main():
     # Use FastText semantic or not
     if args.ft_model == 1:
         # get at least 5x top_n semantically similar words to increase the chances of finding good rhyming pairs among them
-        semantic_sim_words = ft_model.get_top_n_semantic_similar(seed_words, n=(5 * 200))
+        semantic_sim_words = ft_model.get_top_n_semantic_similar(
+            seed_words, n=(5 * 200)
+        )
 
         # deduplicate
         semantic_sim_words = list(set(semantic_sim_words))

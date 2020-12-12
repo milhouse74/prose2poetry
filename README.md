@@ -4,7 +4,7 @@ COMP 550 NLP Fall 2020 final project: _Prose2poetry - Generating poetry from pro
 
 ## Licenses
 
-The code is licensed under the MIT license. Supplemental data (baseline corpora, etc.) have their own attributions in [data/](./data/README.md). Models are trained from scratch (to not include ~1+GB files in the repo) and stored in `./models`.
+The code is licensed under the MIT license. Supplemental data (baseline corpora, etc.) have their own attributions in [data/](./data/README.md). Models are trained from scratch and stored in `./models`. The models dir using a single novel as an input corpus takes a combined 2GB of space, so these are not included in the repo. Retraining the models from scratch doesn't take too much time (~10 minutes).
 
 ## Install dependencies
 
@@ -16,80 +16,34 @@ $ pip install -r ./requirements.txt
 
 ## Code structure
 
-There are 2 runnable scripts:
+There are 3 runnable scripts:
 * `evaluate_metrics.py` - load and score baselines and generated couplets
+* `evaluate_doc2vec.py` - evaluate semantic similarity in the generated couplets
 * `prose2poetry.py` - take seed words as an input and produce an output poem
 
 The important code is in the embedded [prose2poetry](./prose2poetry) library:
-* `generators.py` for poetry generators
-* `rhyme_score.py` contains our custom `rhyme_score` function, which incorporates phonemic substitution from [Phonemic Similarity Metrics to Compare Pronunciation Methods](https://homes.cs.washington.edu/~bhixon/papers/phonemic_similarity_metrics_Interspeech_2011.pdf) into the score
-* `fasttext_model.py` for the genism Fasttext word pair generation, incorporating a semantic score and the above rhyme_score in a weighted combination
-* `doc2vec_model.py` contains an implementation of the gensim doc2vec. This code will be used to calculate sentence similarity.
-* `couplet_score.py` contains the couplet scorer, which incorporates METEOR (from NLTK), semantic score (above), rhyme score (on the last words), and the edit distance from the string of stresses (produced by [pronouncingpy](https://github.com/aparrish/pronouncingpy))
+* `generators.py` for poetry generators including an LSTM and Markov chain model
+* `rhyme_score.py` contains our custom `rhyme_score` function using phoneme data from the CMUdict
+* `couplet_score.py` contains the couplet scorer which incorporates rhyme score on the end words, and a syllabic meter score
+* `vector_models.py` contains gensim Fasttext and doc2vec embedding models + training and loading code
 * `corpora.py` contains some classes to faciliate the loading and filtering of couplets from nltk's Gutenberg corpus, the [Gutenberg Poetry corpus](https://github.com/aparrish/gutenberg-poetry-corpus), and [PoetryFoundation](https://www.kaggle.com/tgdivy/poetry-foundation-poems) corpus (included in [data](./data))
 
-### Generate pairs of rhyming words
+## Usage
 
-Generate pairs of rhyming words from a prose corpus (default: Jane Austen - Emma, available in nltk's Gutenberg corpus):
+When initially cloning the project, the data dir contains the baseline corpora stored with Git-LFS. You should confirm that the size of the data directory is 75M. If it isn't, you may need to run `git-lfs pull`.
+
+The models directory on a fresh clone is empty. This is where FastText, doc2vec, and the LSTM models are stored after training. The first time you run `./evaluate_metrics.py` or `./prose2poetry.py`, the models will be trained and saved. To reset the training (e.g. if changing the input corpus), delete the contents of the models directory.
+
+### Example
+
+Generating couplets from the novel _Emma_ by Jane Austen, using the seed word "love":
 
 ```
-from prose2poetry.corpora import ProseCorpus
-from prose2poetry.fasttext_model import FasttextModel
-import itertools
-
-# use default prose corpus - gutenberg novels from Jane Austen
-corpus = ProseCorpus()
-
-# use prose corpus as input to fasttextmodel
-ft_model = FasttextModel(corpus)
-
-seed_words = ['pride', 'prejudice']
-
-# get top n semantically similar words from the fasttext model trained on the prose corpus
-semantic_sim_words = ft_model.get_top_n_semantic_similar(
-    seed_words, n=50
-)
-
-# deduplicate
-semantic_sim_words = list(set(semantic_sim_words))
-
-# add seed words into the list
-semantic_sim_words.extend(seed_words)
-pairs = itertools.combinations(semantic_sim_words, 2)
-
-all_results = []
-for p in pairs:
-    # use a combined score which incorporates rhyme and semantic score
-    all_results.append((ft_model.combined_score(p[0], p[1]), p[0], p[1]))
-
-# sort in reverse order
-all_results = sorted(all_results, key=lambda x: x[0], reverse=True)
-
-# print top 10 results by combined score of semantic similarity and rhyme
-print("top 10 results for seed words {0}".format(seed_words))
-    for a in all_results[: 10]:
-        print(
-            "combined (semantic, rhyme) score of {0}, {1}: {2}".format(a[1], a[2], a[0])
-        )
+$ ./prose2poetry.py love
+Markov chain generated couplet:
+        ('He seems every thing -- Who is in great spirits one morning to enjoy .-- She saw that Enscombe could not often so ill - tempered men that ever was , therefore , to the end of it ; and on the occasion of much present enjoyment to be the means of promoting it , I have heard every thing into sad uncertainty', 'Respect for right conduct is felt by every body for their not meaning to make more than common certainty')
+        score: 0.7116666666666667
+LSTM generated couplet:
+        (', to for , and and to , from the with the his his s his nervous uncertainty', 'and it a - certainty')
+        score: 0.685
 ```
-
-Output:
-```
-top 10 results for seed words ['pride', 'prejudice']
-combined (semantic, rhyme) score of farmer, warmer: 0.8256660335040193
-combined (semantic, rhyme) score of bride, pride: 0.7219737315173498
-combined (semantic, rhyme) score of coolly, really: 0.6358651270910091
-combined (semantic, rhyme) score of notice, service: 0.6341798802223162
-combined (semantic, rhyme) score of coolly, wholly: 0.6287796542687313
-combined (semantic, rhyme) score of respectable, ridiculous: 0.6180500689991171
-combined (semantic, rhyme) score of ridiculous, affectionate: 0.6167437171579526
-combined (semantic, rhyme) score of respectable, affectionate: 0.6124035327875881
-combined (semantic, rhyme) score of wholly, really: 0.6097792640191385
-combined (semantic, rhyme) score of what, but: 0.598802176363053
-```
-
-### Couplet scoring
-
-The `CoupletScorer` class requires a corpus as an input. In this project we use the filtered Gutenberg couplets (5000 randomly selected) as the input. These are used as the base corpora of the semantic similarity and METEOR evaluation metrics.
-
-This is a tricky problem since METEOR (which we need by definition since we are generating couplets) require a base corpus against which to compare and generate metrics.
