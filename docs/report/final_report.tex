@@ -22,6 +22,7 @@
 \usepackage{subcaption}
 \usepackage{makecell}
 \usepackage{placeins}
+\usepackage{hyperref}
 \usepackage{graphicx}
 \graphicspath{ {./} }
 \renewcommand{\UrlFont}{\ttfamily\small}
@@ -304,11 +305,11 @@ Prose & 0.34 & 0.13 & 0.56 & 0.19 & 0.18 & 0.46 & 0.48 & 0.19 & 0.76 \\ [0.5ex]
 	\hline
 	PoetryFoundation baseline & (`Poets hate to have directives', `They’re on their own, not on collectives') \\ [0.5ex]
 	\hline
-	Prose & (`i thought you meant to go with me', `they would be very much pleased') \\ [0.5ex]
-	\hline
 	\textit{prose2poetry} LSTM & (`as that he had so note', `was been now turned wrote') \\ [0.5ex]
 	\hline
 	\textit{prose2poetry} Markov chain & (`And how tired you must not propose', `Mr . Knightley could not oppose') \\ [0.5ex]
+	\hline
+	Prose & (`i thought you meant to go with me', `they would be very much pleased') \\ [0.5ex]
 	\hline
 \end{tabular*}
 \caption{Examples of top-scoring couplets from all evaluated datasets}
@@ -345,7 +346,7 @@ Results interpretation here. "Our poems scored well, stress score showed real po
 
 The trained LSTM described in section \ref{sec:lstm} did not perform to the expected standard. Using additional input corpora would have been against the spirit of \textit{prose2poetry}, so it was discarded as an option. One possible alternative could have been to use a pre-trained language model such as GPT-2 \cite{gpt2}, fine-tuned with the input prose corpus.
 
-\subsection{Multiple pronunciations and sense disambiguation}
+\subsection{Homograph sense disambiguation}
 \label{sec:synset}
 
 Associating different pronunciations of homographs with their respective senses or parts of speech proved difficult, a problem also noted by \citet{hopkins-kiela-2017}. Consider an example, using WordNet \cite{wordnet} as a lexical resource. There are two pronunciations for ``bow'' in the CMUdict: like ``cow'' or like ``snow''. In WordNet, there are fourteen synsets for ``bow'', and two different parts of speech.
@@ -361,14 +362,14 @@ A requirement of automated NLG evaluation metrics is reference sentences to comp
 
 \subsection{Code availability}
 
-The Python code for \textit{prose2poetry} is released as an open-source project \footnote{https://github.com/milhouse74/prose2poetry}.
+The Python code for \textit{prose2poetry} is on GitHub\footnote{\href{https://github.com/milhouse74/prose2poetry}{https://github.com/milhouse74/prose2poetry}}.
 
 %%%%%%%%%%%%%%
 % STAT OF CONT		%
 %%%%%%%%%%%%%%
 \section{Statement of contributions}
 \label{sec:contributions}
-Sevag Hanssian worked on finding different poem baselines \& the prose dataset, creating the coding architecture, developing the couplet scoring and running the experiments. François Milot developed the word embedding (FastText), the doc2vec training, the word pair generation and design of the rhyme score. Also, the design and direction of the project have been decided as a group. 
+Sevag created the prose and poetry datasets, the code architecture, the Markov chain generator, the couplet score, and ran the evaluations. François developed the vector embedding models (FastText and doc2vec), the word pair generation, the LSTM generator, and the rhyme score. Sophie participated in overall model design meetings, the discovery of the pronunciation-sense ambiguity problem, and in the proofreading of the final report.
 
 \vfill
 \clearpage % force a page break before references
