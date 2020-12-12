@@ -3,7 +3,7 @@
 import sys
 from prose2poetry.corpora import ProseCorpus, GutenbergCouplets, PFCouplets, pairs
 from prose2poetry.couplet_score import CoupletScorer
-from prose2poetry.generators import NaiveGenerator, MarkovChainGenerator, LSTMModel1
+from prose2poetry.generators import MarkovChainGenerator, LSTMModel1
 from prose2poetry.vector_models import FasttextModel
 import argparse
 import numpy
@@ -81,9 +81,6 @@ def main():
     prose_corpus = ProseCorpus()
     couplets_3 = random.sample(list(pairs(prose_corpus.joined_sents)), args.n_eval)
 
-    gen = NaiveGenerator(prose_corpus)
-    couplets_4 = gen.generate_couplets(n=args.n_eval)
-
     ft_model = FasttextModel(prose_corpus)
 
     seed_words = ["love", "hate", "pride", "prejudice", "justice", "romance"]
@@ -109,9 +106,9 @@ def main():
     gen3 = LSTMModel1(prose_corpus, ft_model, memory_growth=args.memory_growth)
 
     # return is a set, cast it to a list
-    couplets_5 = list(gen2.generate_couplets(all_results, n=args.n_eval))
+    couplets_4 = list(gen2.generate_couplets(all_results, n=args.n_eval))
 
-    couplets_6 = list(gen3.generate_couplets(all_results, n=args.n_eval))
+    couplets_5 = list(gen3.generate_couplets(all_results, n=args.n_eval))
 
     quarter = int(args.n_eval / 4)
 
@@ -139,10 +136,6 @@ def main():
                 couplets_5[quarter : 2 * quarter],
                 couplets_5[2 * quarter : 3 * quarter],
                 couplets_5[3 * quarter :],
-                couplets_6[:quarter],
-                couplets_6[quarter : 2 * quarter],
-                couplets_6[2 * quarter : 3 * quarter],
-                couplets_6[3 * quarter :],
             ],
         )
     )
@@ -173,17 +166,11 @@ def main():
             )
         elif i == 12:
             print(
-                "\nNaive generator, {0} couplets\n----------------------------------------------\n".format(
-                    scores_ndarray.shape[0]
-                )
-            )
-        elif i == 16:
-            print(
                 "\nMarkov generator, {0} couplets\n----------------------------------------------\n".format(
                     scores_ndarray.shape[0]
                 )
             )
-        elif i == 20:
+        elif i == 16:
             print(
                 "\nLSTM generator, {0} couplets\n----------------------------------------------\n".format(
                     scores_ndarray.shape[0]
