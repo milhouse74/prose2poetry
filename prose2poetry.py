@@ -5,7 +5,11 @@ import itertools
 from prose2poetry.vector_models import FasttextModel
 from prose2poetry.couplet_score import CoupletScorer
 from prose2poetry.corpora import ProseCorpus, GutenbergCouplets
-from prose2poetry.generators import MarkovChainGenerator, LSTMModel1
+from prose2poetry.generators import (
+    MarkovChainGenerator,
+    LSTMModel1,
+    CustomMarkovChainGenerator,
+)
 import argparse
 import random
 
@@ -55,8 +59,6 @@ def main():
     # use prose corpus as input to various internal classes
     ft_model = FasttextModel(corpus)
 
-    couplet_gold_standard = GutenbergCouplets()
-
     # get at least 5x top_n semantically similar words to increase the chances of finding good rhyming pairs among them
     semantic_sim_words = ft_model.get_top_n_semantic_similar(
         args.seed_words, n=5 * args.top_n
@@ -85,16 +87,25 @@ def main():
     all_results = sorted(all_results, key=lambda x: x[0], reverse=True)
 
     generator1 = MarkovChainGenerator(corpus, memory_growth=args.memory_growth)
-    couplets1 = list(generator1.generate_couplets(all_results, n=1))
+    couplets1 = list(generator1.generate_couplets(all_results, n=5))
 
     generator2 = LSTMModel1(corpus, ft_model, memory_growth=args.memory_growth)
-    couplets2 = list(generator2.generate_couplets(all_results, n=1))
+    couplets2 = list(generator2.generate_couplets(all_results, n=5))
 
-    print("Markov chain generated couplet:\n\t{0}".format(couplets1[0]))
-    print("\tscore: {0}".format(CoupletScorer.calculate_scores(couplets1[0])[0]))
+    generator3 = CustomMarkovChainGenerator(corpus)
+    couplets3 = list(generator3.generate_couplets(all_results, n=100))
 
-    print("LSTM generated couplet:\n\t{0}".format(couplets2[0]))
-    print("\tscore: {0}".format(CoupletScorer.calculate_scores(couplets2[0])[0]))
+    for couplet in couplets1:
+        print("Markov chain generated couplet:\n\t{0}".format(couplet))
+        print("\tscore: {0}".format(CoupletScorer.calculate_scores(couplet)[0]))
+
+    for couplet in couplets2:
+        print("LSTM generated couplet:\n\t{0}".format(couplet))
+        print("\tscore: {0}".format(CoupletScorer.calculate_scores(couplet)[0]))
+
+    for couplet in couplets3:
+        print("Custom Markov generated couplet:\n\t{0}".format(couplet))
+        print("\tscore: {0}".format(CoupletScorer.calculate_scores(couplet)[0]))
 
     return 0
 

@@ -7,7 +7,6 @@ from tensorflow.keras.layers import Dense, Dropout, LSTM, GRU, SimpleRNN
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.losses import MeanSquaredError
 import tensorflow
-from nltk.corpus import gutenberg
 from gensim.models import FastText
 import math
 import pathlib
@@ -15,6 +14,7 @@ import matplotlib.pyplot as plt
 import markovify
 import random
 import time
+from collections import Counter
 
 
 def _train_and_save_model_lstm_1(prose_corpus, ft_model, vocab, model_path, memory=5):
@@ -193,6 +193,180 @@ class MarkovChainGenerator:
                     )
                 except Exception:
                     pass
+                print("currently at {0} couplets".format(len(ret)))
+
+                if len(ret) >= n:
+                    return ret
+                continue
+            # reached end of rhyming pair list
+            n_new = len(ret)
+            iters += 1
+            if n_new == n_old:
+                print("exhausted at {0} couplets".format(n_new))
+                return ret
+            else:
+                print("appended {0} new couplets".format(n_new - n_old))
+            n_old = n_new
+
+        return ret
+
+
+class CustomMarkovChainGenerator:
+    def __init__(self, prose_corpus):
+        self.bigram_suffix_to_trigram = {}
+        self.bigram_suffix_to_trigram_weights = {}
+
+        for line in prose_corpus.sents:
+            line.insert(0, "<BOS>")
+            line.append("<EOS1>")
+            line.append("<EOS2>")
+
+            i = len(line) - 1
+
+            while i > 1:
+                word3 = line[i]
+                word2 = line[i - 1]
+                word1 = line[i - 2]
+                if (word2, word3) not in self.bigram_suffix_to_trigram:
+                    self.bigram_suffix_to_trigram[(word2, word3)] = []
+                    self.bigram_suffix_to_trigram_weights[(word2, word3)] = []
+
+                if word1 not in self.bigram_suffix_to_trigram[(word2, word3)]:
+                    self.bigram_suffix_to_trigram[(word2, word3)].append(word1)
+                    self.bigram_suffix_to_trigram_weights[(word2, word3)].append(1)
+
+                elif word1 in self.bigram_suffix_to_trigram[(word2, word3)]:
+                    self.bigram_suffix_to_trigram_weights[(word2, word3)][
+                        self.bigram_suffix_to_trigram[(word2, word3)].index(word1)
+                    ] += 1
+                i = i - 1
+
+    def top_prev_word(self, word2, word3, n=10):
+        # this is causing problems
+        if (word2, word3) not in self.bigram_suffix_to_trigram:
+            words = [word2, word3]
+            probs = []
+            probs.append(0)
+            probs.append(0)
+            return words, probs
+
+        curr_bigram_dict = {}
+        size = len(self.bigram_suffix_to_trigram[word2, word3])
+        i = 0
+        denom = 0
+        while i < size:
+            curr_bigram_dict[
+                self.bigram_suffix_to_trigram[word2, word3][i]
+            ] = self.bigram_suffix_to_trigram_weights[(word2, word3)][i]
+            denom += self.bigram_suffix_to_trigram_weights[(word2, word3)][i]
+            i += 1
+        k = Counter(curr_bigram_dict)
+        most_common = k.most_common(n)
+        keys = []
+        values = []
+        for key, value in most_common:
+            keys.append(key)
+            values.append(value / denom)
+        return keys, values
+
+    def generate_sentences(self, suffix, beam=10):
+        suffix = suffix.split()
+        word2 = suffix[len(suffix) - 1]
+        word3 = suffix[len(suffix) - 2]
+
+        candidates = []
+        probs = []
+        prev_words, prev_probs = self.top_prev_word(word2, word3, beam)
+        top_10 = []
+        top_10_probs = []
+
+        i = 0
+        while i < len(prev_words):
+            temp = []
+            for item in suffix:
+                temp.append(item)
+            temp.append(prev_words[i])
+            candidates.append(temp)
+            probs.append(prev_probs[i])
+            i += 1
+
+        iter = 0
+        done = 0
+        while len(top_10) < 10:
+            # while done == 0:
+            big_candidates = []
+            big_probs = []
+
+            for t, candidate in enumerate(candidates):
+                # for each of the ten current possible sentences
+                word2 = candidate[len(candidate) - 1]
+                word3 = candidate[len(candidate) - 2]
+
+                prev_words, prev_probs = self.top_prev_word(word2, word3, beam)
+
+                f = 0
+                for f, word in enumerate(prev_words):
+                    temp = []
+                    for item in candidate:
+                        temp.append(item)
+                    temp.append(word)
+                    big_candidates.append(temp)
+                    big_probs.append(prev_probs[f] * probs[t])
+
+            # this is currently sorting according to the transitional probabilities alone
+            # but to incorporate semantic cohesion it could sort according to some semantic cohesion score combined w/that
+            # so above, each time the probability of the candidate sentence is updated
+            # the probability I'm currently using could be somehow combined to a semantic similarity score
+            # could be overloaded s.t. it compares to either second rhyming word, or the entire first sentence depending on which sentence is being generated
+            high = sorted(range(len(big_probs)), key=lambda sub: big_probs[sub])[-beam:]
+
+            candidates = []
+            probs = []
+            for index in high:
+
+                if big_candidates[index][len(big_candidates[index]) - 1] == "<BOS>":
+
+                    # done = 1
+                    return big_candidates[index]
+                    # top_10.append(big_candidates[index])
+                    # top_10_probs.append(big_probs[index])
+                else:
+                    candidates.append(big_candidates[index])
+                    probs.append(big_probs[index])
+                    if iter > 20:
+                        return big_candidates[index]
+            iter += 1
+
+            # return top_10;
+        return top_10
+
+    def generate_couplets(self, rhyming_pairs, n=10):
+        ret = set()
+        iters = 0
+        n_old = 0
+        while len(ret) < n:
+            for rhyming_pair in rhyming_pairs:
+                print("rhyming pair: {0}".format(rhyming_pair))
+                # rhyming_pair[0] is the rhyme score
+                # tuples of strings are hashable
+                sent1 = " ".join(
+                    self.generate_sentences("<EOS1> " + rhyming_pair[1])[::-1]
+                )
+
+                if "<BOS>" not in sent1:
+                    continue
+
+                sent1 = sent1.replace("<EOS1>", "").replace("<BOS>", "")
+
+                sent2 = " ".join(
+                    self.generate_sentences("<EOS1> " + rhyming_pair[2])[::-1]
+                )
+
+                if "<BOS>" not in sent2:
+                    continue
+                sent2 = sent2.replace("<EOS1>", "").replace("<BOS>", "")
+
+                ret.add((sent1, sent2))
                 print("currently at {0} couplets".format(len(ret)))
 
                 if len(ret) >= n:
