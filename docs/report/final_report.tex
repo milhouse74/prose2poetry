@@ -58,7 +58,6 @@
 
 \title{\textit{prose2poetry} -- Generating rhyming couplets from Gutenberg novels}
 
-
 \author{Sevag Hanssian \\
   McGill University \\
  \texttt{sevag.hanssian@mail.mcgill.ca}\\\And
@@ -87,7 +86,7 @@
 
 Poetry is a form of writing that condenses emotions, stories, and thoughts into verse. Devices such as rhyme and meter are used to impart prosody, or a musical quality, to the written lines, transforming them beyond mere information transfer. Underneath the surface, or form of the poem, metaphor is often used to weave subtexts and hidden meanings. There are many styles of poem ranging from the haiku and sonnet, with strict rules, to the more flexible free verse \citep{poem_type}.
 
-A simple form of poetry  a pair of rhyming sentences that form a unit; a rhyming couplet \cite{couplet_def}. To further simplify, metaphor and other subjective aspects of poetry that are hard to define and measure are ignored, and the only rhyme structure considered is end rhyme \cite{end_rhyme_def}. \textit{The farmer milked the goat, while he shivered in his coat} is an example of a couplet with end rhymes.
+A simple form of poetry is the rhyming couplet, a pair of rhyming sentences that form a unit \cite{couplet_def}. To further simplify, metaphor and other subjective aspects of poetry that are hard to define and measure are ignored, and the only rhyme structure considered is end rhyme \cite{end_rhyme_def}. \textit{The farmer milked the goat, while he shivered in his coat} is an example of a couplet with end rhymes.
 
 The model proposed by this paper, \textit{prose2poetry}, will take a non-rhyming prose corpus (e.g. an English novel) and a seed word as inputs. As its output, it will generate rhyming couplets based on the theme of the seed word, built from the vocabulary and language of the input corpus. To judge the success of the model, a quantitative couplet score is proposed. The scores of the generated couplets will be compared to scores of human-written couplets.
 
@@ -124,7 +123,7 @@ The pronouncingpy library includes rhyming word lookups. The implementation extr
 \subsubsection{Word Embedding}
 \label{sec:fasttext}
 
-The word pair generation step needs to generate words that rhyme and are semantically related. The \textit{FastText} word embedding \cite{fasttext}, which handles out-of-vocabulary better than \textit{word2vec} \cite{wordvec}, was used to quantify the semantic context of two words. The word embedding is trained on the input prose corpus, so that the generated words are in the vocabulary of the input. Hyperparameters are shown in table \ref{table:HP_fasttext}.
+The word pair generation step needs to generate words that rhyme and are semantically related. The \textit{FastText} word embedding \cite{fasttext}, which handles out-of-vocabulary better than \textit{word2vec} \cite{wordvec}, was used to quantify the semantic context of two words. The word embedding is trained on the input prose corpus, so that the generated words are from the vocabulary of the input. Hyperparameters are shown in table \ref{table:HP_fasttext}.
 
 \begin{table}[ht]
 \centering
@@ -155,7 +154,7 @@ The word pair generation step needs to generate words that rhyme and are semanti
 \subsection{Sentence Generation}
 \label{sec:languagegen}
 
-Next, pairs of sentences where the rhyming words occur sentence-finally are generated.
+Next, pairs of sentences that end with the rhyming words are generated.
 
 \subsubsection{LSTM Model}
 \label{sec:lstm}
@@ -172,24 +171,16 @@ The LSTM was designed to have one hidden layer with 64 units, and use a batch si
     \label{fig:LearningCurves}
 \end{figure}
 
-
 \subsubsection{Markov Chain Models}
 \label{sec:markov}
 
-The first Markov model is a trigram model with beam search. The sentences are processed backwards, using a bigram consisting of the seed word and an end-of-sentence token as input and stopping generation when a beginning-of-sentence token is predicted. An advantage of this model is the flexibility of the search function, which could be modified in future work to decrease the effects of data sparsity. However, despite its strong results, it was not included in final results due to overfitting concerns; given little data, it is likely to produce similar outputs to the text itself, especially with less common seed words. 
+Given the difficulties in training a successful neural generator with small input data, the next generator considered was a Markov chain. A Markov chain is a statistical model which computes probabilities of sequences of variables from a set of possible values \cite[Chapter~8]{jurafskymarkov}, and commonly used in NLG.
 
-Given the difficulties in training a successful neural generator with small input data, and the concerns over overfitting the trigram model to the data, a third model based on an open-source implementation of a Markov chain model was used. A Markov chain is a statistical model which computes probabilities of sequences of variables from a set of possible values \cite[Chapter~8]{jurafskymarkov}. Figure \ref{fig:markov} shows a graphic of a Markov chain for word transitions.
+The first Markov chain model implemented was a trigram model with beam search, using a sliding window of the last three words in reverse order. The first input is a bigram consisting of the end-of-sentence token and the end word. The best preceding words are selected from the possible candidates using bigram-to-trigram transition probabilities observed from the input corpus in reverse order. Beam search is used to select the overall most probable candidates and prune the others at each step.
 
-\begin{figure}
-	\centering
-	\includegraphics[scale=0.35]{./markov_chain.png}
-	\caption{Markov chain for word transition probabilities \cite{jurafskymarkov}}
-\label{fig:markov}
-\end{figure}
+The window slides to include the newly generated words, and the process is repeated until a beginning-of-sentence token is predicted, at which point the sentence is returned. Despite promising results, data sparsity caused it to sometimes create outputs that closely resembled the input corpus, so the model was discarded. In future work, the beam search function could be modified to minimize overlap with the input corpus.
 
-The Markov chain implementation in the open-source \textit{markovify} \cite{markovify} library takes a text corpus as an input, splits it into sentences, and builds probabilities of forward word transitions starting from the beginning of each sentence and moving towards the end. New sentences are generated from a provided beginning word using word transitions observed in the input corpus.
-
-Additional work was done by \citet{markovifyfork} to implement a backwards Markov chain generator. This reverses the order in which sentences from the corpus are consumed to build the model, resulting in word transitions that move backwards in a sentence starting from an ending word, suitable for the purposes of \textit{prose2poetry}.
+The open-source \textit{markovify} \cite{markovify} library was used as an alternative, as it has specific features to prevent recreating sentences that overlap highly with the input. Additional work was done by \citet{markovifyfork} to reverse the chain, resulting in backwards sentence generation from an ending word, suitable for the purposes of \textit{prose2poetry}.
 
 %%%%%%%%%%%%%%
 % EXP & RESULTS		%
