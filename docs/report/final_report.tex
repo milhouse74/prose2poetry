@@ -56,7 +56,7 @@
 \setlength{\parskip}{0pt}
 }{\end{itemize}}
 
-\title{\textit{prose2poetry} -- Generating rhyming couplets from Gutenberg novels}
+\title{\textit{prose2poetry} Generating Rhyming Couplets from Gutenberg Novels}
 
 \author{Sevag Hanssian \\
   McGill University \\
@@ -123,7 +123,7 @@ The pronouncingpy library includes rhyming word lookups. The implementation extr
 \subsubsection{Word Embedding}
 \label{sec:fasttext}
 
-The word pair generation step needs to generate words that rhyme and are semantically related. The \textit{FastText} word embedding \cite{fasttext}, which handles out-of-vocabulary better than \textit{word2vec} \cite{wordvec}, was used to quantify the semantic context of two words. The word embedding is trained on the input prose corpus, so that the generated words are from the vocabulary of the input. Hyperparameters are shown in table \ref{table:HP_fasttext}.
+The word pair generation step needs to generate words that rhyme and are semantically related. The \textit{FastText} word embedding \cite{fasttext}, which handles out-of-vocabulary better than \textit{word2vec} \cite{wordvec}, was used to quantify the semantic context of two words. The word embedding is trained on the input prose corpus, so that the generated words come from the vocabulary of the input. Hyperparameters are shown in table \ref{table:HP_fasttext}.
 
 \begin{table}[ht]
 \centering
