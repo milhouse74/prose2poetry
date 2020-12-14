@@ -56,7 +56,7 @@
 \setlength{\parskip}{0pt}
 }{\end{itemize}}
 
-\title{\textit{prose2poetry} Generating Rhyming Couplets from Gutenberg Novels}
+\title{\textit{prose2poetry} -- Generating Rhyming Couplets from Gutenberg Novels}
 
 \author{Sevag Hanssian \\
   McGill University \\
@@ -180,7 +180,7 @@ The first Markov chain model implemented was a trigram model with beam search, u
 
 The window slides to include the newly generated words, and the process is repeated until a beginning-of-sentence token is predicted, at which point the sentence is returned. Despite promising results, data sparsity caused it to sometimes create outputs that closely resembled the input corpus, so the model was discarded. In future work, the beam search function could be modified to minimize overlap with the input corpus.
 
-The open-source \textit{markovify} \cite{markovify} library was used as an alternative, as it has specific features to prevent recreating sentences that overlap highly with the input. Additional work was done by \citet{markovifyfork} to reverse the chain, resulting in backwards sentence generation from an ending word, suitable for the purposes of \textit{prose2poetry}.
+The open-source \textit{markovify} \cite{markovify} library was used as an alternative, as it has specific features to prevent recreating sentences that have a high overlap with the input. Additional work was done by \citet{markovifyfork} to reverse the chain, resulting in backwards sentence generation from an ending word, suitable for \textit{prose2poetry}.
 
 %%%%%%%%%%%%%%
 % EXP & RESULTS		%
@@ -191,7 +191,7 @@ The open-source \textit{markovify} \cite{markovify} library was used as an alter
 \subsection{Baseline Corpora}
 \label{sec:corpora}
 
-Using a similar approach to \citet{cole}, the Gutenberg Poetry \cite{gutenbergpoetry} and PoetryFoundation \cite{poetryfoundationkaggle} datasets were filtered to produce rhyming couplets. The filtering process uses the rhymes function available in the pronouncingpy library to extract every pair with rhyming end words from the same poem as a couplet. The total is 331,713 rhyming couplets from Gutenberg, and 10,009 rhyming couplets from PoetryFoundation.
+Using a similar approach to \citet{cole}, the Gutenberg Poetry \cite{gutenbergpoetry} and PoetryFoundation \cite{poetryfoundationkaggle} datasets were filtered to produce rhyming couplets. The filtering process uses the rhymes function available in the pronouncingpy library to extract consecutive sentence pairs with rhyming end words from the same poem as couplets. The total is 331,713 rhyming couplets from Gutenberg, and 10,009 rhyming couplets from PoetryFoundation.
 
 \subsection{Couplet Evaluation}
 \label{sec:coupleteval}
@@ -348,7 +348,7 @@ There is no readily available mapping between CMUdict pronunciation and WordNet 
 \subsection{Sentence Content Evaluation}
 \label{sec:nlg}
 
-The biggest difficulty encountered in \textit{prose2poetry} was in quantitatively evaluating the contents of the couplet. Sentence correctness is especially tricky with poetry, which does not necessarily need to strictly obey grammar. The field of NLG evaluation was explored for ideas to evaluate correctness. \citet{nlgeval} present a survey on popular automated metrics for evaluating machine-generated text in several applications including machine translation. They found that METEOR \cite{meteor} correlates well at the sentence level with human judgement.
+The biggest difficulty encountered in \textit{prose2poetry} was in quantitatively evaluating the contents of the couplet. Sentence correctness is especially tricky with poetry, which does not need to strictly obey grammar. The field of NLG evaluation was explored for ideas to evaluate correctness. \citet{nlgeval} present a survey on popular automated metrics for evaluating machine-generated text in several applications including machine translation. They found that METEOR \cite{meteor} correlates well at the sentence level with human judgement.
 
 A requirement of automated NLG evaluation metrics is reference sentences to compare the inputs to. It is unclear what these should be when evaluating poetry. In an early experiment, the baseline Gutenberg poetry corpus was used as reference sentences in METEOR, hoping this would assign high scores to good poetry. This did not provide any meaningful results, and NLG metrics were deemed inappropriate for evaluating couplets.
 
@@ -359,7 +359,7 @@ The Python code for \textit{prose2poetry} is on GitHub\footnote{\href{https://gi
 %%%%%%%%%%%%%%
 % STAT OF CONT		%
 %%%%%%%%%%%%%%
-\section{Statement of contributions}
+\section{Statement of Contributions}
 \label{sec:contributions}
 Sevag found and prepared the datasets, created the code architecture, implemented the couplet score and third-party Markov chain generator, and ran the evaluations. François developed the vector embedding models (FastText and doc2vec), the word pair generation, the LSTM generator, and the rhyme score. Sophie discovered the pronunciation-sense ambiguity problem and wrote the initial prototype Markov chain generator.
 
